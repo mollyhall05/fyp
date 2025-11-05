@@ -11,10 +11,10 @@ import { GroupCard } from "@/components/GroupCard";
 interface StudyGroup {
     id: string;
     name: string;
-    description: string;
-    subject: string;
+    description: string | null;
     created_at: string;
-    max_members: number;
+    created_by: string;
+    updated_at: string;
     member_count?: number;
 }
 
@@ -47,9 +47,8 @@ const Dashboard = () => {
 
             // Load all public groups
             const { data: publicGroups, error: publicError } = await supabase
-                .from("study_groups")
+                .from("groups")
                 .select("*")
-                .eq("is_public", true)
                 .order("created_at", { ascending: false });
 
             if (publicError) throw publicError;

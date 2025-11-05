@@ -17,7 +17,6 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [subject, setSubject] = useState("");
-    const [maxMembers, setMaxMembers] = useState(10);
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
 
@@ -44,9 +43,8 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
                 .insert({
                     name,
                     description,
-                    subject,
-                    max_members: maxMembers,
                     created_by: user.id,
+                    created_at: new Date().toISOString(),
                 })
                 .select()
                 .single();
@@ -61,13 +59,13 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
                 return;
             }
 
-            // Add the creator of the group as the first member with an admin role
+            // Add the creator of the group as the first member with admin privileges
             const { error: memberError } = await supabase
                 .from("group_members")
                 .insert({
                     group_id: group.id,
                     user_id: user.id,
-                    role: "admin",
+                    is_admin: true,
                 });
 
             if (memberError) {
@@ -89,7 +87,6 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
             setName("");
             setDescription("");
             setSubject("");
-            setMaxMembers(10);
 
             onSuccess();
         } catch (error: any) {
@@ -147,20 +144,7 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
                         />
                     </div>
 
-                    <div className="space-y-2">
-                        <Label htmlFor="maxMembers">Maximum Members</Label>
-                        <Input
-                            id="maxMembers"
-                            type="number"
-                            value={maxMembers}
-                            onChange={(e) => setMaxMembers(parseInt(e.target.value))}
-                            min={2}
-                            max={50}
-                            required
-                        />
-                    </div>
-
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 mt-4">
                         <Button
                             type="button"
                             variant="outline"

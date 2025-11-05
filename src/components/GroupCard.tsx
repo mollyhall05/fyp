@@ -10,10 +10,11 @@ interface GroupCardProps {
     group: {
         id: string;
         name: string;
-        description: string;
-        subject: string;
+        description: string | null;
         created_at: string;
-        max_members: number;
+        created_by: string;
+        updated_at: string;
+        member_count?: number;
     };
     isMember?: boolean;
     onUpdate: () => void;
@@ -70,7 +71,6 @@ export const GroupCard = ({ group, isMember, onUpdate }: GroupCardProps) => {
                 <div className="flex items-start justify-between">
                     <div className="flex-1">
                         <CardTitle className="text-xl mb-2">{group.name}</CardTitle>
-                        <Badge className="bg-gradient-primary">{group.subject}</Badge>
                     </div>
                 </div>
             </CardHeader>
@@ -79,12 +79,14 @@ export const GroupCard = ({ group, isMember, onUpdate }: GroupCardProps) => {
                     {group.description || "No description provided"}
                 </CardDescription>
 
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                    <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        <span>Max {group.max_members}</span>
+                {group.member_count !== undefined && (
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
+                        <div className="flex items-center gap-1">
+                            <Users className="h-4 w-4" />
+                            <span>{group.member_count} members</span>
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {isMember ? (
                     <Button
