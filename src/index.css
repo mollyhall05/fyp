@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here.
+All colors MUST be HSL.
+*/
+
+@layer base {
+    :root {
+        /* Background colors - clean and spacious */
+        --background: 210 25% 98%;
+        --foreground: 215 25% 15%;
+
+        /* Card colors */
+        --card: 0 0% 100%;
+        --card-foreground: 215 25% 15%;
+
+        /* Popover colors */
+        --popover: 0 0% 100%;
+        --popover-foreground: 215 25% 15%;
+
+        /* Primary - Academic Blue */
+        --primary: 215 85% 55%;
+        --primary-foreground: 0 0% 100%;
+        --primary-hover: 215 85% 50%;
+
+        /* Secondary - Warm accent for social features */
+        --secondary: 25 95% 60%;
+        --secondary-foreground: 0 0% 100%;
+
+        /* Muted colors */
+        --muted: 210 25% 95%;
+        --muted-foreground: 215 15% 45%;
+
+        /* Accent - Energetic collaboration color */
+        --accent: 175 70% 50%;
+        --accent-foreground: 0 0% 100%;
+
+        /* Success color for achievements */
+        --success: 145 65% 50%;
+        --success-foreground: 0 0% 100%;
+
+        /* Destructive */
+        --destructive: 0 75% 60%;
+        --destructive-foreground: 0 0% 100%;
+
+        /* Border and input */
+        --border: 215 20% 88%;
+        --input: 215 20% 88%;
+        --ring: 215 85% 55%;
+
+        /* Radius */
+        --radius: 0.75rem;
+
+        /* Gradients */
+        --gradient-primary: linear-gradient(135deg, hsl(215 85% 55%), hsl(195 85% 60%));
+        --gradient-secondary: linear-gradient(135deg, hsl(25 95% 60%), hsl(35 95% 65%));
+        --gradient-hero: linear-gradient(135deg, hsl(215 85% 55%), hsl(175 70% 50%));
+
+        /* Shadows */
+        --shadow-soft: 0 2px 8px hsl(215 25% 15% / 0.06);
+        --shadow-medium: 0 4px 16px hsl(215 25% 15% / 0.1);
+        --shadow-large: 0 8px 32px hsl(215 25% 15% / 0.15);
+
+        /* Animations */
+        --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dark {
+        --background: 215 30% 8%;
+        --foreground: 210 25% 95%;
+
+        --card: 215 25% 12%;
+        --card-foreground: 210 25% 95%;
+
+        --popover: 215 25% 12%;
+        --popover-foreground: 210 25% 95%;
+
+        --primary: 215 85% 60%;
+        --primary-foreground: 0 0% 100%;
+        --primary-hover: 215 85% 65%;
+
+        --secondary: 25 95% 65%;
+        --secondary-foreground: 0 0% 100%;
+
+        --muted: 215 25% 18%;
+        --muted-foreground: 215 15% 60%;
+
+        --accent: 175 70% 55%;
+        --accent-foreground: 0 0% 100%;
+
+        --success: 145 65% 55%;
+        --success-foreground: 0 0% 100%;
+
+        --destructive: 0 75% 65%;
+        --destructive-foreground: 0 0% 100%;
+
+        --border: 215 20% 22%;
+        --input: 215 20% 22%;
+        --ring: 215 85% 60%;
+
+        --gradient-primary: linear-gradient(135deg, hsl(215 85% 60%), hsl(195 85% 65%));
+        --gradient-secondary: linear-gradient(135deg, hsl(25 95% 65%), hsl(35 95% 70%));
+        --gradient-hero: linear-gradient(135deg, hsl(215 85% 60%), hsl(175 70% 55%));
+
+        --shadow-soft: 0 2px 8px hsl(0 0% 0% / 0.2);
+        --shadow-medium: 0 4px 16px hsl(0 0% 0% / 0.3);
+        --shadow-large: 0 8px 32px hsl(0 0% 0% / 0.4);
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+}
