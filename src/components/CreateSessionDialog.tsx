@@ -47,12 +47,7 @@ export const CreateSessionDialog = ({
                     group_id: groupId,
                     title,
                     description,
-                    session_date: new Date(sessionDate).toISOString(),
-                    duration_minutes: duration,
-                    is_online: isOnline,
-                    location: isOnline ? null : location,
-                    meeting_link: isOnline ? meetingLink : null,
-                    created_by: user.id,
+                    session_date: new Date(sessionDate).toISOString()
                 } as any);
 
             if (error) throw error;

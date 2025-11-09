@@ -1,7 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Users, Calendar } from "lucide-react";
+import { Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
@@ -36,16 +35,12 @@ export const GroupCard = ({ group, isMember, onUpdate }: GroupCardProps) => {
                 return;
             }
 
-            const { error } = await supabase
+            await supabase
                 .from("group_members")
                 .insert({
                     group_id: group.id,
                     user_id: user.id,
                 });
-
-            if (error) {
-                throw error;
-            }
 
             toast({
                 title: "Success!",

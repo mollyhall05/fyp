@@ -1,19 +1,24 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, MapPin, Video } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface Session {
     id: string;
     title: string;
     description: string;
     session_date: string;
-    duration_minutes: number;
-    location: string;
-    is_online: boolean;
-    meeting_link: string;
+    group_id: string;
+    created_at: string;
+    updated_at: string;
+    duration_minutes?: number;
+    location?: string;
+    is_online?: boolean;
+    meeting_link?: string;
 }
 
 interface SessionListProps {
@@ -21,6 +26,7 @@ interface SessionListProps {
 }
 
 export const SessionList = ({ groupId }: SessionListProps) => {
+    const navigate = useNavigate();
     const [sessions, setSessions] = useState<Session[]>([]);
     const [loading, setLoading] = useState(true);
     const { toast } = useToast();
@@ -68,10 +74,21 @@ export const SessionList = ({ groupId }: SessionListProps) => {
         );
     }
 
+    const handleSessionClick = (sessionId: string) => {
+        navigate(`/session/${sessionId}`);
+    };
+
     return (
         <div className="space-y-4">
             {sessions.map((session) => (
-                <Card key={session.id} className="shadow-soft hover:shadow-medium transition-shadow">
+                <Card 
+                    key={session.id} 
+                    className={cn(
+                        "shadow-soft hover:shadow-medium transition-shadow cursor-pointer hover:border-primary/50",
+                        "transition-all duration-200"
+                    )}
+                    onClick={() => handleSessionClick(session.id)}
+                >
                     <CardHeader>
                         <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -91,9 +108,7 @@ export const SessionList = ({ groupId }: SessionListProps) => {
                             </div>
                             <div className="flex items-center gap-2 text-muted-foreground">
                                 <Clock className="h-4 w-4" />
-                                <span>
-                  {new Date(session.session_date).toLocaleTimeString()} ({session.duration_minutes} min)
-                </span>
+                                <span>{new Date(session.session_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             {session.is_online && session.meeting_link && (
                                 <div className="flex items-center gap-2">
