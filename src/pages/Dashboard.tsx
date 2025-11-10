@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Plus, LogOut, Calendar, MessageSquare } from "lucide-react";
+import { Users, Plus, LogOut, User, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CreateGroupDialog } from "@/components/CreateGroupDialog";
 import { GroupCard } from "@/components/GroupCard";
@@ -24,6 +24,7 @@ const Dashboard = () => {
     const [myGroups, setMyGroups] = useState<StudyGroup[]>([]);
     const [loading, setLoading] = useState(true);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
+    const [showProfile, setShowProfile] = useState(false);
     const navigate = useNavigate();
     const { toast } = useToast();
 
@@ -44,33 +45,55 @@ const Dashboard = () => {
     const loadGroups = async () => {
         try {
             setLoading(true);
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                navigate("/auth");
+                return;
+            }
 
-            // Load all public groups
-            const { data: publicGroups, error: publicError } = await supabase
+            // First, get all groups where the current user is a member
+            const { data: userMemberships, error: membershipsError } = await supabase
+                .from("group_members")
+                .select("group_id")
+                .eq("user_id", user.id);
+
+            if (membershipsError) throw membershipsError;
+
+            const userGroupIds = userMemberships?.map(m => m.group_id) || [];
+
+            // Then, get all groups with their member counts
+            const { data: allGroups, error: groupsError } = await supabase
                 .from("groups")
-                .select("*")
+                .select(`
+                    *,
+                    group_members!inner(
+                        user_id
+                    )
+                `)
                 .order("created_at", { ascending: false });
 
-            if (publicError) throw publicError;
-
-            // Load groups user is a member of
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                const { data: memberGroups, error: memberError } = await supabase
-                    .from("group_members")
-                    .select("group_id")
-                    .eq("user_id", user.id);
-
-                if (memberError) throw memberError;
-
-                const memberGroupIds = memberGroups?.map(m => m.group_id) || [];
-                const userGroups = publicGroups?.filter(g => memberGroupIds.includes(g.id)) || [];
-                const availableGroups = publicGroups?.filter(g => !memberGroupIds.includes(g.id)) || [];
-
+            if (groupsError) throw groupsError;
+            
+            if (allGroups) {
+                // Separate groups into user's groups and available public groups
+                const userGroups: StudyGroup[] = [];
+                const availableGroups: StudyGroup[] = [];
+                
+                allGroups.forEach(group => {
+                    const memberCount = group.group_members?.length || 0;
+                    const groupWithCount = { ...group, member_count: memberCount };
+                    
+                    if (userGroupIds.includes(group.id)) {
+                        // User is a member of this group
+                        userGroups.push(groupWithCount);
+                    } else if (group.is_public) {
+                        // Only show public groups to non-members
+                        availableGroups.push(groupWithCount);
+                    }
+                });
+                
                 setMyGroups(userGroups);
                 setGroups(availableGroups);
-            } else {
-                setGroups(publicGroups || []);
             }
         } catch (error: any) {
             toast({
@@ -103,18 +126,44 @@ const Dashboard = () => {
                             <div className="bg-gradient-primary p-2 rounded-lg">
                                 <Users className="h-6 w-6 text-white" />
                             </div>
-                            <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                            <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-blue-700">
                 StudySync
               </span>
                         </div>
 
-                        <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">
-                {user?.email}
-              </span>
-                            <Button variant="ghost" size="icon" onClick={handleSignOut}>
-                                <LogOut className="h-5 w-5" />
+                        <div className="relative">
+                            <Button 
+                                variant="ghost" 
+                                className="flex items-center gap-2 group"
+                                onClick={() => setShowProfile(prev => !prev)}
+                            >
+                                <User className="h-5 w-5" />
+                                <span className="hidden sm:inline">Profile</span>
+                                <ChevronDown className={`h-4 w-4 transition-transform ${showProfile ? 'rotate-180' : ''}`} />
                             </Button>
+                            
+                            {showProfile && (
+                                <div className="absolute right-0 mt-1 w-72 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-50">
+                                    <div className="p-4">
+                                        <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">My Account</h3>
+                                        <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{user?.email?.split('@')[0]}</p>
+                                            <p className="text-sm text-gray-600 dark:text-gray-300">
+                                                {user?.email}
+                                            </p>
+                                        </div>
+                                        <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+                                        <button
+                                            onClick={handleSignOut}
+                                            className="w-full text-left px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-700 dark:text-gray-200"
+                                        >
+                                            <LogOut className="h-4 w-4" />
+                                            <span>Sign out</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

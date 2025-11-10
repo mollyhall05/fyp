@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {data} from "autoprefixer";
 
 interface Profile {
     full_name: string;
@@ -50,14 +51,11 @@ const GroupChat = ({ groupId }: GroupChatProps) => {
     const loadMessages = async () => {
         try {
             console.log('Loading messages for group:', groupId);
-            const { data, error } = await supabase
+            const { data: messages, error } = await supabase
                 .from('group_messages')
                 .select(`
                     *,
-                    profiles (
-                        full_name,
-                        email
-                    )
+                    profiles:user_id (username)
                 `)
                 .eq('group_id', groupId)
                 .order('created_at', { ascending: true });

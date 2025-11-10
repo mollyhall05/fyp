@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -17,6 +18,7 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [subject, setSubject] = useState("");
+    const [isPublic, setIsPublic] = useState(true);
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
 
@@ -43,6 +45,8 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
                 .insert({
                     name,
                     description,
+                    subject,
+                    is_public: isPublic,
                     created_by: user.id,
                     created_at: new Date().toISOString(),
                 })
@@ -141,6 +145,25 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Describe what this group is about..."
                             rows={3}
+                        />
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 border rounded-md">
+                        <div className="space-y-0.5">
+                            <Label htmlFor="privacy-toggle" className="text-base">
+                                {isPublic ? 'Public Group' : 'Private Group'}
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                                {isPublic 
+                                    ? 'Anyone can find and join this group' 
+                                    : 'Only people with an invite link can join'}
+                            </p>
+                        </div>
+                        <Switch
+                            id="privacy-toggle"
+                            checked={isPublic}
+                            onCheckedChange={setIsPublic}
+                            className="data-[state=checked]:bg-blue-600"
                         />
                     </div>
 

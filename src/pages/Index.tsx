@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Calendar, MessageSquare, TrendingUp, BookOpen, Target } from "lucide-react";
+import { Users, Calendar, MessageSquare, BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 
@@ -29,14 +29,6 @@ const Index = () => {
                                 </Link>
                             </div>
                         </div>
-                        <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-hero opacity-20 rounded-3xl blur-3xl"></div>
-                            <img
-                                // src={heroImage}
-                                alt="Students collaborating in study group"
-                                className="relative rounded-3xl shadow-large w-full"
-                            />
-                        </div>
                     </div>
                 </div>
             </section>
@@ -57,7 +49,7 @@ const Index = () => {
                         <Card className="shadow-soft hover:shadow-medium transition-shadow">
                             <CardContent className="pt-6">
                                 <div className="bg-gradient-primary p-3 rounded-lg w-fit mb-4">
-                                    <Users className="h-6 w-6 text-white" />
+                                    <Users className="h-6 w-6 text-blue-700" />
                                 </div>
                                 <h3 className="text-xl font-bold mb-2">Study Groups</h3>
                                 <p className="text-muted-foreground">
@@ -69,7 +61,7 @@ const Index = () => {
                         <Card className="shadow-soft hover:shadow-medium transition-shadow">
                             <CardContent className="pt-6">
                                 <div className="bg-gradient-secondary p-3 rounded-lg w-fit mb-4">
-                                    <Calendar className="h-6 w-6 text-white" />
+                                    <Calendar className="h-6 w-6 text-blue-700" />
                                 </div>
                                 <h3 className="text-xl font-bold mb-2">Session Scheduling</h3>
                                 <p className="text-muted-foreground">
@@ -81,7 +73,7 @@ const Index = () => {
                         <Card className="shadow-soft hover:shadow-medium transition-shadow">
                             <CardContent className="pt-6">
                                 <div className="bg-accent p-3 rounded-lg w-fit mb-4">
-                                    <MessageSquare className="h-6 w-6 text-white" />
+                                    <MessageSquare className="h-6 w-6 text-blue-700" />
                                 </div>
                                 <h3 className="text-xl font-bold mb-2">Group Chat</h3>
                                 <p className="text-muted-foreground">
@@ -92,36 +84,12 @@ const Index = () => {
 
                         <Card className="shadow-soft hover:shadow-medium transition-shadow">
                             <CardContent className="pt-6">
-                                <div className="bg-success p-3 rounded-lg w-fit mb-4">
-                                    <TrendingUp className="h-6 w-6 text-white" />
-                                </div>
-                                <h3 className="text-xl font-bold mb-2">Track Progress</h3>
-                                <p className="text-muted-foreground">
-                                    Monitor your study sessions and group participation. See your learning journey visualized.
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="shadow-soft hover:shadow-medium transition-shadow">
-                            <CardContent className="pt-6">
                                 <div className="bg-gradient-primary p-3 rounded-lg w-fit mb-4">
-                                    <BookOpen className="h-6 w-6 text-white" />
+                                    <BookOpen className="h-6 w-6 text-blue-700" />
                                 </div>
                                 <h3 className="text-xl font-bold mb-2">Resource Sharing</h3>
                                 <p className="text-muted-foreground">
                                     Share notes, materials, and helpful resources with your study group members instantly.
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="shadow-soft hover:shadow-medium transition-shadow">
-                            <CardContent className="pt-6">
-                                <div className="bg-gradient-secondary p-3 rounded-lg w-fit mb-4">
-                                    <Target className="h-6 w-6 text-white" />
-                                </div>
-                                <h3 className="text-xl font-bold mb-2">Goal Setting</h3>
-                                <p className="text-muted-foreground">
-                                    Set group goals and individual targets. Stay motivated and accountable together.
                                 </p>
                             </CardContent>
                         </Card>

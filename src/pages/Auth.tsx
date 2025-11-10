@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 const Auth = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [fullName, setFullName] = useState("");
+    const [username, setUsername] = useState("");
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
     const navigate = useNavigate();
@@ -64,7 +64,7 @@ const Auth = () => {
                 password,
                 options: {
                     data: {
-                        full_name: fullName,
+                        username: username.trim(),
                     },
                     emailRedirectTo: window.location.origin,
                 },
@@ -76,7 +76,7 @@ const Auth = () => {
                 .upsert({
                     id: authData.user?.id,
                     email: email,
-                    full_name: fullName.trim(), // Ensure we save the trimmed full name
+                    username: username.trim(), // Ensure we save the trimmed full name
                     created_at: new Date().toISOString()
                 }, {
                     onConflict: 'id',
@@ -90,7 +90,7 @@ const Auth = () => {
             // Clear the form
             setEmail('');
             setPassword('');
-            setFullName('');
+            setUsername('');
 
         } catch (error: any) {
             console.error('Signup error:', error);
@@ -110,11 +110,16 @@ const Auth = () => {
         setLoading(true);
 
         try {
-            await supabase.auth.signInWithPassword({
+            const { error } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
 
+            if (error) throw error;
+            
+            // This will be handled by the auth state listener in useEffect
+            // which will automatically redirect to /dashboard on successful auth
+            
             toast({
                 title: "Welcome back!",
                 description: "You are now logged in.",
@@ -192,13 +197,12 @@ const Auth = () => {
                             <TabsContent value="signup">
                                 <form onSubmit={handleSignUp} className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="signup-name">Full Name</Label>
+                                        <Label htmlFor="signup-name">Username</Label>
                                         <Input
                                             id="signup-name"
                                             type="text"
-                                            placeholder="John Doe"
-                                            value={fullName}
-                                            onChange={(e) => setFullName(e.target.value)}
+                                            value={username}
+                                            onChange={(e) => setUsername(e.target.value)}
                                             required
                                         />
                                     </div>
