@@ -42,17 +42,32 @@ const Auth = () => {
         setLoading(true);
 
         try {
-            // 1. First, check if email already exists
-            const { data: existingUser } = await supabase
+            // 1. Check if email or username already exists
+            const { data: existingEmail } = await supabase
                 .from('users')
                 .select('email')
                 .eq('email', email)
                 .maybeSingle();
 
-            if (existingUser) {
+            if (existingEmail) {
                 toast({
                     title: "Email already registered",
                     description: "This email is already in use. Please sign in instead.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            const { data: existingUsername } = await supabase
+                .from('users')
+                .select('username')
+                .eq('username', username.trim())
+                .maybeSingle();
+
+            if (existingUsername) {
+                toast({
+                    title: "Username already taken",
+                    description: "This username is already taken. Please choose a different one.",
                     variant: "destructive",
                 });
                 return;
@@ -76,8 +91,7 @@ const Auth = () => {
                 .upsert({
                     id: authData.user?.id,
                     email: email,
-                    username: username.trim(), // Ensure we save the trimmed full name
-                    created_at: new Date().toISOString()
+                    username: username.trim(),
                 }, {
                     onConflict: 'id',
                 });

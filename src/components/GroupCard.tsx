@@ -10,9 +10,7 @@ interface GroupCardProps {
         id: string;
         name: string;
         description: string | null;
-        created_at: string;
         created_by: string;
-        updated_at: string;
         member_count?: number;
     };
     isMember?: boolean;
@@ -40,6 +38,7 @@ export const GroupCard = ({ group, isMember, onUpdate }: GroupCardProps) => {
                 .insert({
                     group_id: group.id,
                     user_id: user.id,
+                    is_admin: false,
                 });
 
             toast({

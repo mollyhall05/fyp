@@ -47,7 +47,7 @@ export const CreateSessionDialog = ({
                     group_id: groupId,
                     title,
                     description,
-                    session_date: new Date(sessionDate).toISOString()
+                    datetime: new Date(sessionDate).toISOString()
                 } as any);
 
             if (error) throw error;

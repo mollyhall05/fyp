@@ -17,7 +17,6 @@ interface CreateGroupDialogProps {
 export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroupDialogProps) => {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
-    const [subject, setSubject] = useState("");
     const [isPublic, setIsPublic] = useState(true);
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
@@ -45,10 +44,8 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
                 .insert({
                     name,
                     description,
-                    subject,
                     is_public: isPublic,
                     created_by: user.id,
-                    created_at: new Date().toISOString(),
                 })
                 .select()
                 .single();
@@ -90,7 +87,6 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
             // Reset the form
             setName("");
             setDescription("");
-            setSubject("");
 
             onSuccess();
         } catch (error: any) {
@@ -122,17 +118,6 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="e.g., Advanced Calculus Study Group"
-                            required
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor="subject">Subject</Label>
-                        <Input
-                            id="subject"
-                            value={subject}
-                            onChange={(e) => setSubject(e.target.value)}
-                            placeholder="e.g., Mathematics, Computer Science"
                             required
                         />
                     </div>

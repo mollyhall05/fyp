@@ -12,9 +12,7 @@ interface StudyGroup {
     id: string;
     name: string;
     description: string | null;
-    created_at: string;
     created_by: string;
-    updated_at: string;
     member_count?: number;
 }
 
@@ -61,18 +59,26 @@ const Dashboard = () => {
 
             const userGroupIds = userMemberships?.map(m => m.group_id) || [];
 
-            // Then, get all groups with their member counts
+            // Debug: Log the user's group memberships
+            console.log('User is a member of group IDs:', userGroupIds);
+            
+            // First, get all groups with their member counts
+            console.log('Fetching all groups...');
             const { data: allGroups, error: groupsError } = await supabase
                 .from("groups")
                 .select(`
                     *,
-                    group_members!inner(
+                    group_members (
                         user_id
                     )
-                `)
-                .order("created_at", { ascending: false });
+                `);
 
-            if (groupsError) throw groupsError;
+            if (groupsError) {
+                console.error('Error fetching groups:', groupsError);
+                throw groupsError;
+            }
+            
+            console.log('All groups from database:', allGroups);
             
             if (allGroups) {
                 // Separate groups into user's groups and available public groups
@@ -80,17 +86,33 @@ const Dashboard = () => {
                 const availableGroups: StudyGroup[] = [];
                 
                 allGroups.forEach(group => {
-                    const memberCount = group.group_members?.length || 0;
-                    const groupWithCount = { ...group, member_count: memberCount };
+                    const memberCount = Array.isArray(group.group_members) ? group.group_members.length : 0;
+                    const groupWithCount: StudyGroup = {
+                        ...group,
+                        member_count: memberCount,
+                    };
+                    
+                    console.log(`Processing group ${group.id} (${group.name}):`, {
+                        isPublic: group.is_public,
+                        memberCount,
+                        isUserMember: userGroupIds.includes(group.id)
+                    });
                     
                     if (userGroupIds.includes(group.id)) {
                         // User is a member of this group
+                        console.log(`Adding to user's groups: ${group.name}`);
                         userGroups.push(groupWithCount);
                     } else if (group.is_public) {
                         // Only show public groups to non-members
+                        console.log(`Adding to available groups: ${group.name}`);
                         availableGroups.push(groupWithCount);
+                    } else {
+                        console.log(`Skipping group (not public and user is not a member): ${group.name}`);
                     }
                 });
+                
+                console.log('User groups:', userGroups);
+                console.log('Available public groups:', availableGroups);
                 
                 setMyGroups(userGroups);
                 setGroups(availableGroups);

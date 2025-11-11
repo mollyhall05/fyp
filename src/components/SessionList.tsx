@@ -10,14 +10,12 @@ import { cn } from "@/lib/utils";
 interface Session {
     id: string;
     title: string;
-    description: string;
-    session_date: string;
+    description?: string;
+    datetime: string;
     group_id: string;
-    created_at: string;
-    updated_at: string;
-    duration_minutes?: number;
+    duration_minutes: number;
     location?: string;
-    is_online?: boolean;
+    is_online: boolean;
     meeting_link?: string;
 }
 
@@ -42,7 +40,7 @@ export const SessionList = ({ groupId }: SessionListProps) => {
                 .from("study_sessions")
                 .select("*")
                 .eq("group_id", groupId)
-                .order("session_date", { ascending: true });
+                .order("datetime", { ascending: true });
 
             if (error) throw error;
             setSessions(data || []);
@@ -104,11 +102,11 @@ export const SessionList = ({ groupId }: SessionListProps) => {
                         <div className="flex flex-wrap gap-4 text-sm">
                             <div className="flex items-center gap-2 text-muted-foreground">
                                 <Calendar className="h-4 w-4" />
-                                <span>{new Date(session.session_date).toLocaleDateString()}</span>
+                                <span>{new Date(session.datetime).toLocaleDateString()}</span>
                             </div>
                             <div className="flex items-center gap-2 text-muted-foreground">
                                 <Clock className="h-4 w-4" />
-                                <span>{new Date(session.session_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span>{new Date(session.datetime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                             </div>
                             {session.is_online && session.meeting_link && (
                                 <div className="flex items-center gap-2">

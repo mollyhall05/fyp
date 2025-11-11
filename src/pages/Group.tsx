@@ -13,6 +13,7 @@ import { CreateSessionDialog } from "@/components/CreateSessionDialog";
 export type GroupMember = {
     id: string;
     user_id: string;
+    is_admin: boolean;
     profiles: {
         user_id: string;
         email: string;
@@ -132,7 +133,11 @@ const Group = () => {
                 .eq('group_id', id);
 
             // Process members data
-            const processedMembers: GroupMember[] = (membersData || []).map((member: any) => ({
+            const processedMembers: {
+                id: any;
+                user_id: any;
+                profiles: { user_id: any; email: any; full_name: any; is_creator: boolean }
+            }[] = (membersData || []).map((member: any) => ({
                 id: member.id,
                 user_id: member.user_id,
                 profiles: {
@@ -159,7 +164,7 @@ const Group = () => {
                         profiles: {
                             user_id: creatorProfile.id,
                             email: creatorProfile.email,
-                            full_name: creatorProfile.full_name || creatorProfile.email?.split('@')[0],
+                            full_name: creatorProfile.username || creatorProfile.email?.split('@')[0],
                             is_creator: true
                         }
                     });
@@ -177,6 +182,14 @@ const Group = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const addGroupMember = async (groupId: string, userId: string) => {
+        const { error } = await supabase
+            .from('group_members')
+            .insert([{ group_id: groupId, user_id: userId, is_admin: false }]);
+
+        if (error) throw error;
     };
 
     if (loading) {

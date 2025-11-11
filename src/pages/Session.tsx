@@ -8,7 +8,7 @@ type Session = {
   id: string;
   title: string;
   description: string | null;
-  session_date: string;
+  datetime: string;
   group_id: string;
   group_name?: string;
 };
@@ -62,7 +62,7 @@ export const Session = () => {
     return <div className="p-6">Session not found</div>;
   }
 
-  const sessionDate = new Date(session.session_date);
+  const sessionDate = new Date(session.datetime);
   const formattedDate = sessionDate.toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
