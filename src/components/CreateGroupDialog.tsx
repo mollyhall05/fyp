@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +46,7 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
                     description,
                     is_public: isPublic,
                     created_by: user.id,
+                    users: [user.id]
                 })
                 .select()
                 .single();
@@ -61,23 +62,13 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
             }
 
             // Add the creator of the group as the first member with admin privileges
-            const { error: memberError } = await supabase
+            await supabase
                 .from("group_members")
                 .insert({
                     group_id: group.id,
                     user_id: user.id,
                     is_admin: true,
                 });
-
-            if (memberError) {
-                console.error('Error adding member to group:', memberError);
-                toast({
-                    title: "Error",
-                    description: "Failed to add you to the study group. Please try again.",
-                    variant: "destructive",
-                });
-                return;
-            }
 
             toast({
                 title: "Success!",
@@ -89,10 +80,12 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
             setDescription("");
 
             onSuccess();
+            onOpenChange(false); // Close the dialog on success
         } catch (error: any) {
+            console.error('Error in handleSubmit:', error);
             toast({
                 title: "Error",
-                description: error.message,
+                description: error.message || "An unexpected error occurred",
                 variant: "destructive",
             });
         } finally {
