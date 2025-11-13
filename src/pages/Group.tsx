@@ -10,18 +10,6 @@ import GroupChat from "@/components/GroupChat";
 import { SessionList } from "@/components/SessionList";
 import { CreateSessionDialog } from "@/components/CreateSessionDialog";
 
-export type GroupMember = {
-    id: string;
-    user_id: string;
-    is_admin: boolean;
-    profiles: {
-        user_id: string;
-        email: string;
-        full_name: string;
-        is_creator: boolean;
-    };
-};
-
 const Group = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -48,14 +36,12 @@ const Group = () => {
                 return;
             }
 
-            const { data, error } = await supabase
+            const { data } = await supabase
                 .from("group_members")
                 .select("*")
                 .eq("group_id", id)
                 .eq("user_id", user.id)
                 .maybeSingle();
-
-            if (error) throw error;
             
             if (!data) {
                 toast({
@@ -109,6 +95,10 @@ const Group = () => {
         try {
             setLoading(true);
 
+            // Get the current user
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
             // First, get the group to find the creator
             const { data: groupData } = await supabase
                 .from('groups')
@@ -118,38 +108,42 @@ const Group = () => {
 
             if (!groupData) return;
 
-            // Then get all group members including their profile data
+            // Get all group members including their profile data
             const { data: membersData } = await supabase
                 .from('group_members')
                 .select(`
-                    id,
-                    profiles:user_id (
-                        id as user_id,
+                    user_id,
+                    group_id,
+                    is_admin,
+                    user:user_id (
+                        id,
                         email,
-                        raw_user_meta_data->>'full_name' as full_name,
-                        raw_user_meta_data->>'avatar_url' as avatar_url
+                        username
                     )
                 `)
                 .eq('group_id', id);
 
             // Process members data
-            const processedMembers: {
-                id: any;
-                user_id: any;
-                profiles: { user_id: any; email: any; full_name: any; is_creator: boolean }
-            }[] = (membersData || []).map((member: any) => ({
-                id: member.id,
-                user_id: member.user_id,
-                profiles: {
+            const allMembers = (membersData || []).map((member: any) => {
+                const isCreator = member.user_id === groupData.created_by;
+                return {
+                    // Create a unique ID using both group_id and user_id since there's no single ID column
+                    id: `${member.group_id}_${member.user_id}`,
                     user_id: member.user_id,
-                    email: member.email,
-                    full_name: member.full_name,
-                    is_creator: member.profiles.is_creator || member.user_id === groupData.created_by
-                }
-            }));
+                    group_id: member.group_id,
+                    is_admin: member.is_admin,
+                    profiles: {
+                        id: member.user_id,
+                        email: member.user?.email || '',
+                        username: member.user?.username || member.user?.email?.split('@')[0] || 'Anonymous',
+                        is_creator: isCreator,
+                    }
+                };
+            });
 
-            // If the creator is not in the 'members' list, add them
-            const creatorInMembers = processedMembers.some(m => m.profiles.is_creator);
+            // Check if the creator is in members, if not add them
+            const creatorInMembers = allMembers.some(m => m.profiles.is_creator);
+            
             if (!creatorInMembers && groupData.created_by) {
                 const { data: creatorProfile } = await supabase
                     .from('users')
@@ -158,20 +152,31 @@ const Group = () => {
                     .single();
 
                 if (creatorProfile) {
-                    processedMembers.push({
+                    allMembers.push({
                         id: `${groupData.created_by}_creator`,
                         user_id: groupData.created_by,
+                        group_id: id,
+                        is_admin: true,
                         profiles: {
-                            user_id: creatorProfile.id,
+                            id: creatorProfile.id,
                             email: creatorProfile.email,
-                            full_name: creatorProfile.username || creatorProfile.email?.split('@')[0],
-                            is_creator: true
+                            username: creatorProfile.username ||
+                                'Group Creator',
+                            is_creator: true,
                         }
                     });
                 }
             }
 
-            setMembers(processedMembers);
+            // Ensure the current user is first in the list if they're a member
+            const currentUserIndex = allMembers.findIndex(m => m.user_id === user?.id);
+            if (currentUserIndex > 0) {
+                const [currentUser] = allMembers.splice(currentUserIndex, 1);
+                allMembers.unshift(currentUser);
+            }
+
+            // Update the 'members' state with the processed list
+            setMembers(allMembers);
         } catch (error: any) {
             console.error('Error loading members:', error);
             toast({
@@ -182,14 +187,6 @@ const Group = () => {
         } finally {
             setLoading(false);
         }
-    };
-
-    const addGroupMember = async (groupId: string, userId: string) => {
-        const { error } = await supabase
-            .from('group_members')
-            .insert([{ group_id: groupId, user_id: userId, is_admin: false }]);
-
-        if (error) throw error;
     };
 
     if (loading) {

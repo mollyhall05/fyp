@@ -4,6 +4,7 @@ import { Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 interface GroupCardProps {
     group: {
@@ -17,14 +18,42 @@ interface GroupCardProps {
     onUpdate: () => void;
 }
 
-export const GroupCard = ({ group, isMember, onUpdate }: GroupCardProps) => {
+export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCardProps) => {
     const { toast } = useToast();
     const navigate = useNavigate();
+    const [group, setGroup] = useState(initialGroup);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchMemberCount = async () => {
+            try {
+                const { count } = await supabase
+                    .from('group_members')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('group_id', group.id);
+
+                setGroup(prev => ({
+                    ...prev,
+                    member_count: count || 0
+                }));
+            } catch (error) {
+                console.error('Error fetching member count:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchMemberCount();
+    }, [group.id]);
+
+    // Update local state if the group prop changes
+    useEffect(() => {
+        setGroup(initialGroup);
+    }, [initialGroup]);
 
     const handleJoinGroup = async () => {
         try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
+            const { data: { user }, error: authError } = await supabase.auth.getUser();
+            if (!user || authError) {
                 toast({
                     title: "Error",
                     description: "You must be logged in to join a group",
@@ -33,7 +62,34 @@ export const GroupCard = ({ group, isMember, onUpdate }: GroupCardProps) => {
                 return;
             }
 
-            await supabase
+            // First check if user is already a member
+            const { data: existingMember, error: checkError } = await supabase
+                .from("group_members")
+                .select()
+                .eq("group_id", group.id)
+                .eq("user_id", user.id)
+                .maybeSingle();
+
+            if (checkError) {
+                console.error('Error checking group membership:', checkError);
+                toast({
+                    title: "Error checking membership",
+                    description: checkError.message || "Failed to check membership. Please try again.",
+                    variant: "destructive",
+                });
+                return;
+            }
+            
+            if (existingMember) {
+                toast({
+                    title: "Already a member",
+                    description: `You're already a member of ${group.name}`,
+                });
+                onUpdate();
+                return;
+            }
+
+            const { error: insertError } = await supabase
                 .from("group_members")
                 .insert({
                     group_id: group.id,
@@ -41,15 +97,32 @@ export const GroupCard = ({ group, isMember, onUpdate }: GroupCardProps) => {
                     is_admin: false,
                 });
 
+            if (insertError) {
+                console.error('Error joining group:', insertError);
+                toast({
+                    title: "Error joining group",
+                    description: insertError.message || "Failed to join the group. Please try again.",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            // Update the member count locally
+            setGroup(prev => ({
+                ...prev,
+                member_count: (prev.member_count || 0) + 1
+            }));
+
             toast({
                 title: "Success!",
                 description: `You've joined ${group.name}`,
             });
             onUpdate();
         } catch (error: any) {
+            console.error('Error joining group:', error);
             toast({
-                title: "Error",
-                description: error.message,
+                title: "Error joining group",
+                description: error.message || "Failed to join the group. Please try again.",
                 variant: "destructive",
             });
         }

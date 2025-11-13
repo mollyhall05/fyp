@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Users, Plus, LogOut, User, ChevronDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CreateGroupDialog } from "@/components/CreateGroupDialog";
@@ -31,6 +31,7 @@ const Dashboard = () => {
         loadGroups();
     }, []);
 
+    // Check if the user is authenticated and set the user state
     const checkUser = async () => {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
@@ -40,87 +41,71 @@ const Dashboard = () => {
         setUser(session.user);
     };
 
+    // Load groups for the user based on their membership status
     const loadGroups = async () => {
+        setLoading(true);
         try {
-            setLoading(true);
             const { data: { user } } = await supabase.auth.getUser();
+
             if (!user) {
-                navigate("/auth");
                 return;
             }
 
-            // First, get all groups where the current user is a member
-            const { data: userMemberships, error: membershipsError } = await supabase
-                .from("group_members")
-                .select("group_id")
-                .eq("user_id", user.id);
-
-            if (membershipsError) throw membershipsError;
-
-            const userGroupIds = userMemberships?.map(m => m.group_id) || [];
-
-            // Debug: Log the user's group memberships
-            console.log('User is a member of group IDs:', userGroupIds);
-            
-            // First, get all groups with their member counts
-            console.log('Fetching all groups...');
-            const { data: allGroups, error: groupsError } = await supabase
-                .from("groups")
+            // Get groups the user is a member of
+            const { data: userGroupsData, error: userGroupsError } = await supabase
+                .from('group_members')
                 .select(`
-                    *,
-                    group_members (
-                        user_id
+                    groups:group_id (
+                        id,
+                        name,
+                        description,
+                        created_by,
+                        is_public
                     )
-                `);
+                `)
+                .eq('user_id', user.id);
 
-            if (groupsError) {
-                console.error('Error fetching groups:', groupsError);
-                throw groupsError;
+            if (userGroupsError) {
+                console.error('Error loading user groups:', userGroupsError);
+                return;
             }
-            
-            console.log('All groups from database:', allGroups);
-            
-            if (allGroups) {
-                // Separate groups into user's groups and available public groups
-                const userGroups: StudyGroup[] = [];
-                const availableGroups: StudyGroup[] = [];
-                
-                allGroups.forEach(group => {
-                    const memberCount = Array.isArray(group.group_members) ? group.group_members.length : 0;
-                    const groupWithCount: StudyGroup = {
-                        ...group,
-                        member_count: memberCount,
-                    };
-                    
-                    console.log(`Processing group ${group.id} (${group.name}):`, {
-                        isPublic: group.is_public,
-                        memberCount,
-                        isUserMember: userGroupIds.includes(group.id)
-                    });
-                    
-                    if (userGroupIds.includes(group.id)) {
-                        // User is a member of this group
-                        console.log(`Adding to user's groups: ${group.name}`);
-                        userGroups.push(groupWithCount);
-                    } else if (group.is_public) {
-                        // Only show public groups to non-members
-                        console.log(`Adding to available groups: ${group.name}`);
-                        availableGroups.push(groupWithCount);
-                    } else {
-                        console.log(`Skipping group (not public and user is not a member): ${group.name}`);
-                    }
-                });
-                
-                console.log('User groups:', userGroups);
-                console.log('Available public groups:', availableGroups);
-                
-                setMyGroups(userGroups);
-                setGroups(availableGroups);
+
+            // Get all public groups
+            const { data: publicGroupsData, error: publicGroupsError } = await supabase
+                .from('groups')
+                .select('*')
+                .eq('is_public', true);
+
+            if (publicGroupsError) {
+                console.error('Error loading public groups:', publicGroupsError);
+                // Continue execution with the groups we could load
             }
-        } catch (error: any) {
+
+            // Process user's groups
+            const userGroups = userGroupsData?.map(item => ({
+                ...item.groups,
+                member_count: 1 // This will be updated by the GroupCard component
+            })) || [];
+
+            // Get IDs of groups the user is already a member of
+            const userGroupIds = new Set(userGroups.map(g => g.id));
+
+            // Filter out groups the user is already a member of from public groups
+            const publicGroups = publicGroupsData
+                ?.filter(group => !userGroupIds.has(group.id))
+                .map(group => ({
+                    ...group,
+                    member_count: 1 // This will be updated by the GroupCard component
+                })) || [];
+
+            setMyGroups(userGroups);
+            setGroups(publicGroups);
+
+        } catch (error) {
+            console.error('Error in loadGroups:', error);
             toast({
                 title: "Error",
-                description: error.message,
+                description: "Failed to load groups",
                 variant: "destructive",
             });
         } finally {
@@ -133,9 +118,22 @@ const Dashboard = () => {
         navigate("/");
     };
 
-    const handleGroupCreated = () => {
-        loadGroups();
-        setShowCreateDialog(false);
+    const handleGroupCreated = async () => {
+        try {
+            await loadGroups();
+            setShowCreateDialog(false);
+            toast({
+                title: "Success!",
+                description: "Group created successfully!",
+            });
+        } catch (error) {
+            console.error('Error in handleGroupCreated:', error);
+            toast({
+                title: "Error",
+                description: "Failed to refresh groups after creation",
+                variant: "destructive",
+            });
+        }
     };
 
     return (
