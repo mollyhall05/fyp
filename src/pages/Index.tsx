@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Calendar, MessageSquare, BookOpen } from "lucide-react";
+import { Users, Calendar, MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Navbar } from "@/components/Navbar";
 
@@ -78,18 +78,6 @@ const Index = () => {
                                 <h3 className="text-xl font-bold mb-2">Group Chat</h3>
                                 <p className="text-muted-foreground">
                                     Stay connected with real-time messaging. Share resources, ask questions, and collaborate seamlessly.
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="shadow-soft hover:shadow-medium transition-shadow">
-                            <CardContent className="pt-6">
-                                <div className="bg-gradient-primary p-3 rounded-lg w-fit mb-4">
-                                    <BookOpen className="h-6 w-6 text-blue-700" />
-                                </div>
-                                <h3 className="text-xl font-bold mb-2">Resource Sharing</h3>
-                                <p className="text-muted-foreground">
-                                    Share notes, materials, and helpful resources with your study group members instantly.
                                 </p>
                             </CardContent>
                         </Card>
