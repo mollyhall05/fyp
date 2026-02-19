@@ -17,4 +17,12 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src')
     }
   },
+  build: {
+    sourcemap: false
+  },
+  optimizeDeps: {
+    esbuildOptions: {
+      sourcemap: false,
+    },
+  },
 });

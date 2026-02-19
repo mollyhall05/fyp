@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Group from "./pages/Group";
 import Session from "./pages/Session";
+import ProfileEdit from "./pages/ProfileEdit";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/group/:id" element={<Group />} />
                     <Route path="/session/:sessionId" element={<Session />} />
+                    <Route path="/profile/edit" element={<ProfileEdit />} />
                     {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                     <Route path="*" element={<NotFound />} />
                 </Routes>

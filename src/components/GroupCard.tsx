@@ -1,10 +1,15 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users } from "lucide-react";
+import { Users, ChevronRight, UserPlus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+
+// Import shared styles and animations
+import { cardVariants, buttonVariants } from "@/styles/animations";
+import { cardStyles, buttonStyles, typography } from "@/styles/layout";
 
 interface GroupCardProps {
     group: {
@@ -23,6 +28,7 @@ export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCard
     const navigate = useNavigate();
     const [group, setGroup] = useState(initialGroup);
     const [loading, setLoading] = useState(true);
+    const [isHovered, setIsHovered] = useState(false);
 
     useEffect(() => {
         const fetchMemberCount = async () => {
@@ -133,45 +139,61 @@ export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCard
     };
 
     return (
-        <Card className="shadow-soft hover:shadow-medium transition-shadow">
-            <CardHeader>
-                <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                        <CardTitle className="text-xl mb-2">{group.name}</CardTitle>
-                    </div>
-                </div>
-            </CardHeader>
-            <CardContent>
-                <CardDescription className="mb-4 line-clamp-2">
-                    {group.description || "No description provided"}
-                </CardDescription>
-
-                {group.member_count !== undefined && (
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center gap-1">
-                            <Users className="h-4 w-4" />
-                            <span>{group.member_count} members</span>
+        <motion.div
+            initial="initial"
+            animate="animate"
+            whileHover="hover"
+            variants={cardVariants}
+            className="h-full"
+        >
+            <Card className={`${cardStyles.base} ${cardStyles.hover} h-full flex flex-col`}>
+                <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                            <CardTitle className={typography.h3}>
+                                {group.name}
+                            </CardTitle>
+                            {group.member_count !== undefined && (
+                                <div className="flex items-center mt-1 text-sm text-muted-foreground">
+                                    <Users className="h-4 w-4 mr-1.5" />
+                                    <span>{group.member_count} {group.member_count === 1 ? 'member' : 'members'}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
-                )}
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col">
+                    <CardDescription className="mb-4 line-clamp-3 flex-1">
+                        {group.description || "No description provided"}
+                    </CardDescription>
 
-                {isMember ? (
-                    <Button
-                        onClick={handleViewGroup}
-                        className="w-full bg-gradient-primary"
+                    <motion.div
+                        className="mt-auto"
+                        variants={buttonVariants}
+                        whileHover={isMember ? "hover" : undefined}
+                        whileTap={isMember ? "tap" : undefined}
                     >
-                        View Group
-                    </Button>
-                ) : (
-                    <Button
-                        onClick={handleJoinGroup}
-                        variant="outline"
-                        className="w-full"
-                    >
-                        Join Group
-                    </Button>
-                )}
-            </CardContent>
-        </Card>
+                        {isMember ? (
+                            <Button 
+                                onClick={handleViewGroup}
+                                className={`w-full ${buttonStyles.primary} group`}
+                            >
+                                View Group
+                                <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            </Button>
+                        ) : (
+                            <Button
+                                onClick={handleJoinGroup}
+                                variant="outline"
+                                className={`w-full ${buttonStyles.outline} group`}
+                            >
+                                <UserPlus className="mr-2 h-4 w-4" />
+                                Join Group
+                            </Button>
+                        )}
+                    </motion.div>
+                </CardContent>
+            </Card>
+        </motion.div>
     );
 };
