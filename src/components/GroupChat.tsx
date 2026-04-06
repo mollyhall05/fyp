@@ -246,7 +246,41 @@ const GroupChat = ({ groupId }: GroupChatProps) => {
         };
     };
 
-    console.log('Rendering messages:', messages);
+    // Format date and time for messages
+    const formatMessageTime = (dateString: string) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const messageDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        
+        // Calculate days difference
+        const daysDiff = Math.floor((messageDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        
+        // Format time as HH:MM
+        const time = date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+        
+        // Format date part
+        let datePrefix = '';
+        if (daysDiff === 0) {
+            datePrefix = 'Today';
+        } else if (daysDiff === -1) {
+            datePrefix = 'Yesterday';
+        } else if (daysDiff > -7 && daysDiff < 0) {
+            datePrefix = date.toLocaleDateString('en-US', { weekday: 'short' });
+        } else {
+            datePrefix = date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+            });
+        }
+        
+        return `${datePrefix} • ${time}`;
+    };
     
     // Auto-scroll to bottom when messages change
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -273,7 +307,7 @@ const GroupChat = ({ groupId }: GroupChatProps) => {
                     ) : (
                         messages.map((message) => (
                             <div key={message.id} className="flex gap-3">
-                                <div className="h-8 w-8 rounded-full bg-gradient-primary flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 shadow-sm">
                                     {message.profiles?.username?.[0]?.toUpperCase() || "?"}
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -282,7 +316,7 @@ const GroupChat = ({ groupId }: GroupChatProps) => {
                                             {message.profiles?.username || "Anonymous"}
                                         </span>
                                         <span className="text-xs text-muted-foreground whitespace-nowrap">
-                                            {new Date(message.created_at).toLocaleTimeString()}
+                                            {formatMessageTime(message.created_at)}
                                         </span>
                                     </div>
                                     <p className="text-sm bg-muted rounded-lg p-3 break-words">

@@ -57,9 +57,11 @@ export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCard
     }, [initialGroup]);
 
     const handleJoinGroup = async () => {
+        console.log('Join group button clicked for group:', group.name);
         try {
             const { data: { user }, error: authError } = await supabase.auth.getUser();
             if (!user || authError) {
+                console.error('Auth error:', authError);
                 toast({
                     title: "Error",
                     description: "You must be logged in to join a group",
@@ -67,6 +69,8 @@ export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCard
                 });
                 return;
             }
+
+            console.log('User authenticated:', user.id);
 
             // First check if user is already a member
             const { data: existingMember, error: checkError } = await supabase
@@ -87,6 +91,7 @@ export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCard
             }
             
             if (existingMember) {
+                console.log('User is already a member');
                 toast({
                     title: "Already a member",
                     description: `You're already a member of ${group.name}`,
@@ -95,6 +100,7 @@ export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCard
                 return;
             }
 
+            console.log('Adding user to group...');
             const { error: insertError } = await supabase
                 .from("group_members")
                 .insert({
@@ -113,6 +119,7 @@ export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCard
                 return;
             }
 
+            console.log('Successfully joined group');
             // Update the member count locally
             setGroup(prev => ({
                 ...prev,
@@ -183,7 +190,12 @@ export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCard
                             </Button>
                         ) : (
                             <Button
-                                onClick={handleJoinGroup}
+                                onClick={(e) => {
+                                    console.log('Button clicked!');
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    handleJoinGroup();
+                                }}
                                 variant="outline"
                                 className={`w-full ${buttonStyles.outline} group`}
                             >

@@ -1,7 +1,5 @@
 import * as React from "react"
-import * as AvatarPrimitive from "@radix-ui/react-avatar"
 import { cva, type VariantProps } from "class-variance-authority"
-
 import { cn } from "@/lib/utils"
 
 const avatarVariants = cva(
@@ -26,31 +24,47 @@ export interface AvatarProps
     VariantProps<typeof avatarVariants> {
   src?: string | null
   alt?: string
+  fallback?: string
+}
+
+const getInitials = (name: string): string => {
+  return name
+    .split(" ")
+    .filter(word => word.length > 0)
+    .slice(0, 2)
+    .map(word => word[0].toUpperCase())
+    .join("")
 }
 
 const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
-  ({ className, size, src, alt = "", ...props }, ref) => {
+  ({ className, size, src, alt = "", fallback, ...props }, ref) => {
+    const [imageError, setImageError] = React.useState(false)
+    const displayText = fallback || getInitials(alt)
+
+    const shouldShowFallback = !src || imageError
+
     return (
       <div
         ref={ref}
         className={cn(avatarVariants({ size, className }))}
         {...props}
       >
-        {src ? (
+        {shouldShowFallback ? (
+          <div className="h-full w-full bg-muted flex items-center justify-center">
+            <span 
+              className="text-muted-foreground font-medium"
+              title={alt}
+            >
+              {displayText}
+            </span>
+          </div>
+        ) : (
           <img
             src={src}
             alt={alt}
             className="h-full w-full object-cover"
+            onError={() => setImageError(true)}
           />
-        ) : (
-          <div className="h-full w-full bg-muted flex items-center justify-center">
-            <span className="text-muted-foreground">
-              {alt
-                .split(" ")
-                .map((n) => n[0])
-                .join("")}
-            </span>
-          </div>
         )}
       </div>
     )
@@ -58,31 +72,4 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
 )
 Avatar.displayName = "Avatar"
 
-const AvatarFallback = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "flex h-full w-full items-center justify-center rounded-full bg-muted",
-      className
-    )}
-    {...props}
-  />
-))
-AvatarFallback.displayName = "AvatarFallback"
-
-const AvatarImage = React.forwardRef<
-  React.ElementRef<typeof AvatarPrimitive.Image>,
-  React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Image
-    ref={ref}
-    className={cn("aspect-square h-full w-full", className)}
-    {...props}
-  />
-))
-AvatarImage.displayName = "AvatarImage"
-
-export { Avatar, AvatarImage, AvatarFallback }
+export { Avatar }

@@ -16,7 +16,10 @@ import {
     Clock,
     Video,
     UserPlus,
-    CheckCircle2
+    CheckCircle2,
+    ExternalLink,
+    Copy,
+    Smartphone
 } from "lucide-react";
 
 interface Session {
@@ -28,6 +31,10 @@ interface Session {
     location: string | null;
     is_online: boolean;
     meeting_link: string | null;
+    zoom_meeting_id?: string | null;
+    zoom_join_url?: string | null;
+    zoom_password?: string | null;
+    zoom_host_url?: string | null;
     group_id: string;
     group_name?: string;
 }
@@ -67,13 +74,22 @@ const Session = () => {
                     title: sessionData.title,
                     description: sessionData.description,
                     datetime: sessionData.datetime,
-                    duration_minutes: sessionData.duration_minutes,
+                    duration_minutes: sessionData.duration_minutes || 60, // Default to 60 if not set
                     location: sessionData.location,
                     is_online: sessionData.is_online,
                     meeting_link: sessionData.meeting_link,
+                    // Handle cases where Zoom fields might not exist yet (migration not applied)
+                    zoom_meeting_id: (sessionData as any).zoom_meeting_id || null,
+                    zoom_join_url: (sessionData as any).zoom_join_url || null,
+                    zoom_password: (sessionData as any).zoom_password || null,
+                    zoom_host_url: (sessionData as any).zoom_host_url || null,
                     group_id: sessionData.group_id,
                     group_name: (sessionData.groups as any)?.name || 'Unknown Group'
                 };
+
+                // Debug logging to check what data we're getting
+                console.log('Session data from DB:', sessionData);
+                console.log('Transformed session:', transformedSession);
 
                 setSession(transformedSession);
             } catch (error: any) {
@@ -94,16 +110,41 @@ const Session = () => {
     const handleJoinSession = async () => {
         if (!session) return;
         
+        console.log('Join session clicked. Session data:', session);
+        console.log('Is online:', session.is_online);
+        console.log('Zoom join URL:', session.zoom_join_url);
+        console.log('Meeting link:', session.meeting_link);
+        
         setIsJoining(true);
         try {
-            // For now, just show a success message
-            // TODO: Implement actual join logic
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            toast({
-                title: 'Success!',
-                description: 'You have joined the session',
-            });
+            // For Zoom meetings, open the Zoom join URL
+            if (session.is_online && session.zoom_join_url) {
+                console.log('Opening Zoom meeting:', session.zoom_join_url);
+                window.open(session.zoom_join_url, '_blank', 'noopener,noreferrer');
+                toast({
+                    title: 'Opening Zoom...',
+                    description: 'Redirecting you to the Zoom meeting',
+                });
+            } else if (session.is_online && session.meeting_link) {
+                console.log('Opening meeting link:', session.meeting_link);
+                window.open(session.meeting_link, '_blank', 'noopener,noreferrer');
+                toast({
+                    title: 'Opening meeting...',
+                    description: 'Redirecting you to the meeting link',
+                });
+            } else {
+                console.log('No meeting link found, showing generic join message');
+                // For in-person sessions or sessions without links
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                toast({
+                    title: 'Joined!',
+                    description: session.is_online 
+                        ? 'You have joined this online session'
+                        : 'You have marked yourself as attending this in-person session',
+                });
+            }
         } catch (error) {
+            console.error('Error in handleJoinSession:', error);
             toast({
                 title: 'Error',
                 description: 'Failed to join session',
@@ -112,6 +153,39 @@ const Session = () => {
         } finally {
             setIsJoining(false);
         }
+    };
+
+    const handleCopyMeetingInfo = () => {
+        if (!session) return;
+        
+        let meetingInfo = '';
+        if (session.is_online && session.zoom_meeting_id) {
+            meetingInfo = `Zoom Meeting\nMeeting ID: ${session.zoom_meeting_id}`;
+            if (session.zoom_password) {
+                meetingInfo += `\nPassword: ${session.zoom_password}`;
+            }
+            meetingInfo += `\nJoin URL: ${session.zoom_join_url}`;
+        } else if (session.is_online && session.meeting_link) {
+            meetingInfo = `Meeting Link: ${session.meeting_link}`;
+        } else {
+            meetingInfo = `Location: ${session.location || 'TBD'}`;
+        }
+        
+        navigator.clipboard.writeText(meetingInfo);
+        toast({
+            title: 'Copied!',
+            description: 'Meeting information copied to clipboard',
+        });
+    };
+
+    const handleCopyJoinUrl = () => {
+        if (!session?.zoom_join_url) return;
+        
+        navigator.clipboard.writeText(session.zoom_join_url);
+        toast({
+            title: 'Link Copied!',
+            description: 'Zoom join link copied to clipboard',
+        });
     };
 
     // Format date and time
@@ -181,6 +255,32 @@ const Session = () => {
                         Back to {session.group_name}
                     </Button>
 
+                    {/* Debug Info - Remove in production */}
+                    {process.env.NODE_ENV === 'development' && (
+                        <Card className="mb-6 border-yellow-200 bg-yellow-50">
+                            <CardContent className="p-4">
+                                <h4 className="font-semibold text-yellow-800 mb-2">Debug Info</h4>
+                                <div className="text-xs text-yellow-700 space-y-1">
+                                    <p>Is Online: {session?.is_online ? 'Yes' : 'No'}</p>
+                                    <p>Meeting Link: {session?.meeting_link || 'None'}</p>
+                                    <p>Zoom Meeting ID: {session?.zoom_meeting_id || 'None'}</p>
+                                    <p>Zoom Join URL: {session?.zoom_join_url || 'None'}</p>
+                                    <p>Zoom Password: {session?.zoom_password || 'None'}</p>
+                                </div>
+                                <div className="mt-3 pt-3 border-t border-yellow-300">
+                                    <Button 
+                                        size="sm" 
+                                        variant="outline"
+                                        onClick={() => window.open('https://zoom.us/test', '_blank')}
+                                        className="text-xs"
+                                    >
+                                        Test Join (Zoom Test Link)
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
                     {/* Main Session Card */}
                     <Card className="mb-8 overflow-hidden">
                         <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
@@ -227,7 +327,7 @@ const Session = () => {
                                 </div>
                             </div>
 
-                            {/* Location */}
+                            {/* Location / Meeting Info */}
                             <div className="flex items-start space-x-3 mb-6">
                                 <div className="p-2 bg-green-100 rounded-lg">
                                     {session.is_online ? (
@@ -237,27 +337,148 @@ const Session = () => {
                                     )}
                                 </div>
                                 <div className="flex-1">
-                                    <p className="font-medium">
+                                    <p className="font-medium mb-3">
                                         {session.is_online ? 'Online Meeting' : 'Location'}
                                     </p>
                                     {session.is_online ? (
-                                        session.meeting_link ? (
-                                            <a 
-                                                href={session.meeting_link}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-primary hover:underline inline-flex items-center"
-                                            >
-                                                Join Meeting
-                                                <Link2 className="h-4 w-4 ml-1" />
-                                            </a>
-                                        ) : (
-                                            <p className="text-muted-foreground">Meeting link will be provided</p>
-                                        )
+                                        <div className="space-y-4">
+                                            {session.zoom_join_url ? (
+                                                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
+                                                    <div className="flex items-center justify-between mb-4">
+                                                        <div className="flex items-center space-x-2">
+                                                            <div className="p-2 bg-blue-600 rounded-lg">
+                                                                <Video className="h-4 w-4 text-white" />
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="font-semibold text-blue-900">Zoom Meeting</h4>
+                                                                <p className="text-sm text-blue-700">Click below to join the session</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center space-x-1">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="outline"
+                                                                onClick={handleCopyJoinUrl}
+                                                                className="h-8 px-2"
+                                                            >
+                                                                <Copy className="h-3 w-3" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                                        <div className="bg-white rounded-lg p-3 border border-blue-100">
+                                                            <p className="text-xs text-blue-600 font-medium mb-1">Meeting ID</p>
+                                                            <p className="font-mono text-sm font-semibold">{session.zoom_meeting_id}</p>
+                                                        </div>
+                                                        {session.zoom_password && (
+                                                            <div className="bg-white rounded-lg p-3 border border-blue-100">
+                                                                <p className="text-xs text-blue-600 font-medium mb-1">Password</p>
+                                                                <p className="font-mono text-sm font-semibold">{session.zoom_password}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    <div className="flex flex-col sm:flex-row gap-2">
+                                                        <Button 
+                                                            asChild
+                                                            size="lg" 
+                                                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+                                                        >
+                                                            <a 
+                                                                href={session.zoom_join_url}
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                                className="inline-flex items-center justify-center"
+                                                            >
+                                                                <Video className="h-4 w-4 mr-2" />
+                                                                Join Zoom Meeting
+                                                                <ExternalLink className="h-4 w-4 ml-2" />
+                                                            </a>
+                                                        </Button>
+                                                        
+                                                        <Button
+                                                            size="lg"
+                                                            variant="outline"
+                                                            onClick={handleCopyMeetingInfo}
+                                                            className="px-4"
+                                                        >
+                                                            <Copy className="h-4 w-4 mr-2" />
+                                                            Copy Info
+                                                        </Button>
+                                                    </div>
+                                                    
+                                                    <div className="mt-3 pt-3 border-t border-blue-200">
+                                                        <div className="flex items-center justify-between text-xs text-blue-600">
+                                                            <div className="flex items-center space-x-1">
+                                                                <Smartphone className="h-3 w-3" />
+                                                                <span>Works on desktop and mobile</span>
+                                                            </div>
+                                                            <a 
+                                                                href="https://zoom.us/download" 
+                                                                target="_blank" 
+                                                                rel="noopener noreferrer"
+                                                                className="hover:underline"
+                                                            >
+                                                                Download Zoom app
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ) : session.meeting_link ? (
+                                                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
+                                                    <div className="flex items-center justify-between mb-3">
+                                                        <div className="flex items-center space-x-2">
+                                                            <div className="p-2 bg-green-600 rounded-lg">
+                                                                <Link2 className="h-4 w-4 text-white" />
+                                                            </div>
+                                                            <div>
+                                                                <h4 className="font-semibold text-green-900">Online Meeting</h4>
+                                                                <p className="text-sm text-green-700">External meeting platform</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <Button 
+                                                        asChild
+                                                        size="lg" 
+                                                        className="w-full bg-green-600 hover:bg-green-700 text-white"
+                                                    >
+                                                        <a 
+                                                            href={session.meeting_link}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="inline-flex items-center justify-center"
+                                                        >
+                                                            <Link2 className="h-4 w-4 mr-2" />
+                                                            Join Meeting
+                                                            <ExternalLink className="h-4 w-4 ml-2" />
+                                                        </a>
+                                                    </Button>
+                                                </div>
+                                            ) : (
+                                                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                                                    <div className="flex items-center space-x-2 text-gray-600">
+                                                        <Video className="h-4 w-4" />
+                                                        <span className="text-sm">Meeting link will be provided by the session host</span>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
                                     ) : (
-                                        <p className="text-muted-foreground">
-                                            {session.location || 'Location to be determined'}
-                                        </p>
+                                        <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-4">
+                                            <div className="flex items-center space-x-2">
+                                                <div className="p-2 bg-orange-600 rounded-lg">
+                                                    <MapPin className="h-4 w-4 text-white" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-semibold text-orange-900">In-Person Location</h4>
+                                                    <p className="text-orange-700">
+                                                        {session.location || 'Location to be determined'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -282,12 +503,26 @@ const Session = () => {
                                     {isJoining ? (
                                         <>
                                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                            Joining...
+                                            {session.is_online && session.zoom_join_url ? 'Opening Zoom...' : 'Joining...'}
                                         </>
                                     ) : (
                                         <>
-                                            <UserPlus className="h-5 w-5 mr-2" />
-                                            Join Session
+                                            {session.is_online && session.zoom_join_url ? (
+                                                <>
+                                                    <Video className="h-5 w-5 mr-2" />
+                                                    Join Zoom Session
+                                                </>
+                                            ) : session.is_online ? (
+                                                <>
+                                                    <UserPlus className="h-5 w-5 mr-2" />
+                                                    Join Online Session
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <UserPlus className="h-5 w-5 mr-2" />
+                                                    Mark Attendance
+                                                </>
+                                            )}
                                         </>
                                     )}
                                 </Button>

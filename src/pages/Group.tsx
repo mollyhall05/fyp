@@ -422,8 +422,9 @@ const Group = () => {
                                                 <div className="flex items-center space-x-4">
                                                     <div className="relative">
                                                         <Avatar className="h-10 w-10">
-                                                            <AvatarFallback className="bg-indigo-100 text-indigo-600">
-                                                                {member.profiles?.full_name?.[0] || member.profiles?.email?.[0]?.toUpperCase() || '?'}
+                                                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                                                                {member.profiles?.username?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 
+                                                                 member.profiles?.email?.[0]?.toUpperCase() || '?'}
                                                             </AvatarFallback>
                                                         </Avatar>
                                                         {member.is_creator && (
@@ -434,11 +435,13 @@ const Group = () => {
                                                     </div>
                                                     <div>
                                                         <p className="text-sm font-medium text-gray-900">
-                                                            {member.profiles?.full_name || member.profiles?.email || 'Anonymous'}
+                                                            {member.profiles?.username || member.profiles?.email?.split('@')[0] || 'Anonymous'}
                                                         </p>
-                                                        <p className="text-sm text-gray-500">
-                                                            {member.profiles?.email}
-                                                        </p>
+                                                        {!member.profiles?.username && member.profiles?.email && (
+                                                            <p className="text-sm text-gray-500">
+                                                                {member.profiles?.email}
+                                                            </p>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 {(member.role === 'admin' || member.is_creator) && (

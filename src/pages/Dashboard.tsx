@@ -46,6 +46,7 @@ const Dashboard = () => {
     const [user, setUser] = useState<any>(null);
     const [groups, setGroups] = useState<StudyGroup[]>([]);
     const [myGroups, setMyGroups] = useState<StudyGroup[]>([]);
+    const [upcomingSessionsCount, setUpcomingSessionsCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [showProfile, setShowProfile] = useState(false);
@@ -55,7 +56,71 @@ const Dashboard = () => {
     useEffect(() => {
         checkUser();
         loadGroups();
+        loadUpcomingSessionsCount();
+        
+        // Set up periodic refresh for sessions count (every 5 minutes)
+        const interval = setInterval(() => {
+            loadUpcomingSessionsCount();
+        }, 5 * 60 * 1000); // 5 minutes
+
+        return () => clearInterval(interval);
     }, []);
+
+    // Load upcoming sessions count for the user
+    const loadUpcomingSessionsCount = async () => {
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            // Get all groups the user is a member of
+            const { data: userGroups } = await supabase
+                .from('group_members')
+                .select('group_id')
+                .eq('user_id', user.id);
+
+            if (!userGroups || userGroups.length === 0) {
+                setUpcomingSessionsCount(0);
+                return;
+            }
+
+            const groupIds = userGroups.map(g => g.group_id);
+
+            // Get upcoming sessions from user's groups
+            const now = new Date().toISOString();
+            const { data: sessions, error } = await supabase
+                .from('study_sessions')
+                .select('id')
+                .in('group_id', groupIds)
+                .gte('datetime', now) // Only future sessions
+                .order('datetime', { ascending: true });
+
+            if (error) {
+                console.error('Error loading upcoming sessions count:', error);
+                setUpcomingSessionsCount(0);
+                return;
+            }
+
+            setUpcomingSessionsCount(sessions?.length || 0);
+        } catch (error) {
+            console.error('Error loading upcoming sessions count:', error);
+            setUpcomingSessionsCount(0);
+        }
+    };
+
+    // Export a refresh function that can be called by child components
+    const refreshSessionsCount = () => {
+        loadUpcomingSessionsCount();
+    };
+
+    // Make it available globally for child components to call
+    useEffect(() => {
+        // Store the refresh function on window for child components to access
+        (window as any).refreshDashboardSessionsCount = refreshSessionsCount;
+        
+        return () => {
+            delete (window as any).refreshDashboardSessionsCount;
+        };
+    }, [loadUpcomingSessionsCount]);
 
     // Check if the user is authenticated and set the user state
     const checkUser = async () => {
@@ -70,12 +135,14 @@ const Dashboard = () => {
     // Function to refresh the groups list
     const handleGroupUpdated = () => {
         loadGroups();
+        loadUpcomingSessionsCount();
     };
 
     // Handle successful group creation
     const handleCreateGroup = () => {
         // Refresh the groups list to show the newly created group
         loadGroups();
+        loadUpcomingSessionsCount();
         // Show success message
         toast({
             title: "Group created successfully!",
@@ -325,7 +392,7 @@ const Dashboard = () => {
                                         <div>
                                             <p className="text-sm font-medium text-muted-foreground">Upcoming Sessions</p>
                                             <p className="text-2xl font-semibold">
-                                                {loading ? '--' : '3'}
+                                                {loading ? '--' : upcomingSessionsCount}
                                             </p>
                                         </div>
                                         <div className="p-3 rounded-xl bg-gradient-to-br from-teal-600 to-teal-500 text-white shadow-lg">
@@ -364,7 +431,7 @@ const Dashboard = () => {
                                         value="calendar" 
                                         className="data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent px-1 py-3 rounded-none text-muted-foreground data-[state=active]:text-foreground"
                                     >
-                                        Calendar View
+                                        Upcoming Sessions
                                     </TabsTrigger>
                                     <TabsTrigger 
                                         value="discover" 

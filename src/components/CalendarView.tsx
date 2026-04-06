@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, Apple, CalendarPlus, Calendar as CalendarIcon2, ExternalLink } from "lucide-react";
+import { Calendar as CalendarIcon, Apple, CalendarPlus, Calendar as CalendarIcon2, ExternalLink, Clock, MapPin, Video, Loader2, Sparkles } from "lucide-react";
 import { addToCalendar, addToGoogleCalendar } from "@/lib/calendar";
+import { motion } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -98,24 +95,30 @@ export const CalendarView = () => {
     }
   };
 
-  const renderEventContent = (eventInfo: any) => {
-    const event = {
-      title: eventInfo.event.title,
-      description: eventInfo.event.extendedProps.description,
-      start: eventInfo.event.start,
-      end: eventInfo.event.end,
-      location: eventInfo.event.extendedProps.location,
-      isOnline: eventInfo.event.extendedProps.isOnline,
-      meetingLink: eventInfo.event.extendedProps.meetingLink
-    };
-
+  const renderEventCard = (event: CalendarEvent) => {
     const handleAddToCalendar = async (provider: 'default' | 'google' | 'apple' = 'default') => {
       try {
         let result;
         if (provider === 'google') {
-          result = await addToGoogleCalendar(event);
+          result = await addToGoogleCalendar({
+            title: event.title,
+            description: event.extendedProps.description,
+            start: event.start,
+            end: event.end,
+            location: event.extendedProps.location,
+            isOnline: event.extendedProps.isOnline,
+            meetingLink: event.extendedProps.meetingLink
+          });
         } else {
-          result = await addToCalendar(event);
+          result = await addToCalendar({
+            title: event.title,
+            description: event.extendedProps.description,
+            start: event.start,
+            end: event.end,
+            location: event.extendedProps.location,
+            isOnline: event.extendedProps.isOnline,
+            meetingLink: event.extendedProps.meetingLink
+          });
         }
         
         toast({
@@ -133,26 +136,86 @@ export const CalendarView = () => {
     };
 
     return (
-      <div className="p-2 overflow-hidden">
-        <div className="font-medium truncate">{eventInfo.event.title}</div>
-        <div className="text-xs text-muted-foreground truncate">
-          {eventInfo.event.extendedProps.groupName}
-        </div>
-        <div className="flex items-center justify-between mt-1">
-          <Badge 
-            variant={eventInfo.event.extendedProps.isOnline ? "outline" : "default"}
-            className="text-xs"
-          >
-            {eventInfo.event.extendedProps.isOnline ? "Online" : "In-Person"}
-          </Badge>
+      <motion.div 
+        className="p-4 bg-card border border-primary/20 rounded-xl hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer"
+        whileHover={{ scale: 1.02, y: -2 }}
+        transition={{ duration: 0.2 }}
+        onClick={() => window.location.href = `/session/${event.id}`}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <h4 className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                {event.title}
+              </h4>
+              <Badge 
+                variant={event.extendedProps.isOnline ? "outline" : "default"}
+                className={`text-xs font-medium ${
+                  event.extendedProps.isOnline 
+                    ? "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200" 
+                    : "bg-green-100 text-green-700 border-green-200 hover:bg-green-200"
+                } transition-colors`}
+              >
+                {event.extendedProps.isOnline ? "Online" : "In-Person"}
+              </Badge>
+            </div>
+            
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+              <Sparkles className="h-4 w-4" />
+              <span>{event.extendedProps.groupName}</span>
+            </div>
+            
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <div className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                <span>{new Date(event.start).toLocaleDateString('en-US', { 
+                  month: 'short', 
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true 
+                })}</span>
+              </div>
+              
+              <div className="flex items-center gap-1">
+                {event.extendedProps.isOnline ? (
+                  <>
+                    <Video className="h-4 w-4" />
+                    <span>Online</span>
+                  </>
+                ) : (
+                  <>
+                    <MapPin className="h-4 w-4" />
+                    <span>{event.extendedProps.location || 'In-Person'}</span>
+                  </>
+                )}
+              </div>
+            </div>
+            
+            {event.extendedProps.description && (
+              <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                {event.extendedProps.description}
+              </p>
+            )}
+          </div>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
-                <CalendarPlus className="h-3.5 w-3.5" />
-              </Button>
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 rounded-lg hover:bg-primary/10 transition-colors" 
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <CalendarPlus className="h-4 w-4" />
+                </Button>
+              </motion.div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-52">
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
                 handleAddToCalendar('default');
@@ -181,38 +244,107 @@ export const CalendarView = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </div>
+      </motion.div>
     );
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-64">Loading calendar...</div>;
+    return (
+      <motion.div 
+        className="flex flex-col justify-center items-center h-96 bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-md rounded-2xl border border-primary/20"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          className="mb-4"
+        >
+          <Loader2 className="h-12 w-12 text-primary" />
+        </motion.div>
+        <motion.p 
+          className="text-lg font-medium text-foreground mb-2"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
+          Loading your study sessions...
+        </motion.p>
+        <motion.p 
+          className="text-sm text-muted-foreground"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
+          Syncing with your calendar
+        </motion.p>
+      </motion.div>
+    );
   }
 
   return (
-    <div className="h-[700px] mt-4">
-      <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        }}
-        events={events}
-        eventContent={renderEventContent}
-        eventClick={(info) => {
-          // Navigate to session details when an event is clicked
-          window.location.href = `/session/${info.event.id}`;
-        }}
-        eventTimeFormat={{
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true
-        }}
-        dayMaxEventRows={3}
-        height="100%"
-      />
-    </div>
+    <motion.div 
+      className="relative"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Calendar Header */}
+      <div className="mb-6 p-4 bg-card border border-primary/20 rounded-xl shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-gradient-to-r from-blue-600 to-teal-500 text-white">
+              <CalendarIcon className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Study Sessions Calendar</h3>
+              <p className="text-sm text-muted-foreground">View and manage your upcoming study sessions</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-200">
+              {events.length} Sessions
+            </Badge>
+          </div>
+        </div>
+      </div>
+
+      {/* Events List */}
+      <motion.div 
+        className="space-y-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 0.5 }}
+      >
+        {events.length > 0 ? (
+          events.map((event, index) => (
+            <motion.div
+              key={event.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
+            >
+              {renderEventCard(event)}
+            </motion.div>
+          ))
+        ) : (
+          <motion.div 
+            className="flex flex-col justify-center items-center py-16 bg-card border border-primary/20 rounded-2xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+          >
+            <div className="p-4 rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white mb-4">
+              <CalendarIcon className="h-8 w-8" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">No upcoming sessions</h3>
+            <p className="text-sm text-muted-foreground text-center max-w-md">
+              You don't have any study sessions scheduled. Join a study group or create a new session to get started!
+            </p>
+          </motion.div>
+        )}
+      </motion.div>
+    </motion.div>
   );
 };

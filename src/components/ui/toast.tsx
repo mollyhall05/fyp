@@ -1,7 +1,7 @@
 import * as React from "react";
 import * as ToastPrimitives from "@radix-ui/react-toast";
 import { cva, type VariantProps } from "class-variance-authority";
-import { X } from "lucide-react";
+import { X, CheckCircle, AlertCircle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ToastProvider = ToastPrimitives.Provider;
@@ -28,6 +28,7 @@ const toastVariants = cva(
             variant: {
                 default: "border bg-background text-foreground",
                 destructive: "destructive group border-destructive bg-destructive text-destructive-foreground",
+                success: "border-green-200 bg-green-50 text-green-800 group-[.destructive]:border-red-200 group-[.destructive]:bg-red-50 group-[.destructive]:text-red-800",
             },
         },
         defaultVariants: {
@@ -43,6 +44,20 @@ const Toast = React.forwardRef<
     return <ToastPrimitives.Root ref={ref} className={cn(toastVariants({ variant }), className)} {...props} />;
 });
 Toast.displayName = ToastPrimitives.Root.displayName;
+
+const ToastIcon = ({ variant }: { variant?: "default" | "destructive" | "success" }) => {
+    const iconMap = {
+        default: <Info className="h-4 w-4" />,
+        destructive: <AlertCircle className="h-4 w-4" />,
+        success: <CheckCircle className="h-4 w-4" />,
+    };
+    
+    return (
+        <div className="flex-shrink-0">
+            {iconMap[variant || "default"]}
+        </div>
+    );
+};
 
 const ToastAction = React.forwardRef<
     React.ElementRef<typeof ToastPrimitives.Action>,
@@ -103,6 +118,7 @@ export {
     ToastProvider,
     ToastViewport,
     Toast,
+    ToastIcon,
     ToastTitle,
     ToastDescription,
     ToastClose,

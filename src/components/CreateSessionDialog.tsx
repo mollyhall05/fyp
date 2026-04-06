@@ -7,6 +7,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { zoomService } from "@/lib/zoom";
+import { ZoomErrorHandler } from "@/lib/zoom-error-handler";
+import { Video, Loader2 } from "lucide-react";
 
 interface CreateSessionDialogProps {
     open: boolean;
@@ -28,7 +31,9 @@ export const CreateSessionDialog = ({
     const [isOnline, setIsOnline] = useState(false);
     const [location, setLocation] = useState("");
     const [meetingLink, setMeetingLink] = useState("");
+    const [useZoom, setUseZoom] = useState(true);
     const [loading, setLoading] = useState(false);
+    const [creatingZoomMeeting, setCreatingZoomMeeting] = useState(false);
     const { toast } = useToast();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -40,15 +45,65 @@ export const CreateSessionDialog = ({
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error("You must be logged in");
 
+            let zoomMeetingData = null;
+            
+            // Create Zoom meeting if online session and Zoom is enabled
+            if (isOnline && useZoom) {
+                setCreatingZoomMeeting(true);
+                try {
+                    zoomMeetingData = await zoomService.createMeeting({
+                        topic: title,
+                        start_time: new Date(sessionDate).toISOString(),
+                        duration: duration,
+                        agenda: description || `Study session for ${title}`
+                    });
+                    
+                    toast({
+                        title: "Zoom meeting created!",
+                        description: "A Zoom meeting has been automatically created for this session.",
+                    });
+                } catch (zoomError: any) {
+                    console.error('Error creating Zoom meeting:', zoomError);
+                    const userFriendlyMessage = ZoomErrorHandler.getUserFriendlyMessage(zoomError);
+                    toast({
+                        title: "Zoom meeting failed",
+                        description: userFriendlyMessage,
+                        variant: "destructive",
+                    });
+                    // Continue without Zoom - user can add manual link
+                } finally {
+                    setCreatingZoomMeeting(false);
+                }
+            }
+
+            // Prepare session data
+            const sessionData: any = {
+                group_id: groupId,
+                title,
+                description,
+                datetime: new Date(sessionDate).toISOString(),
+                duration_minutes: duration,
+                is_online: isOnline
+            };
+
+            if (isOnline) {
+                if (zoomMeetingData) {
+                    sessionData.zoom_meeting_id = zoomMeetingData.id;
+                    sessionData.zoom_join_url = zoomMeetingData.join_url;
+                    sessionData.zoom_password = zoomMeetingData.password;
+                    sessionData.zoom_host_url = zoomMeetingData.join_url;
+                    sessionData.meeting_link = zoomMeetingData.join_url;
+                } else if (meetingLink) {
+                    sessionData.meeting_link = meetingLink;
+                }
+            } else {
+                sessionData.location = location;
+            }
+
             // Create the study session
             const { error } = await supabase
                 .from("study_sessions")
-                .insert({
-                    group_id: groupId,
-                    title,
-                    description,
-                    datetime: new Date(sessionDate).toISOString()
-                } as any);
+                .insert(sessionData);
 
             if (error) throw error;
 
@@ -65,8 +120,13 @@ export const CreateSessionDialog = ({
             setIsOnline(false);
             setLocation("");
             setMeetingLink("");
+            setUseZoom(true);
 
             onSuccess();
+            // Refresh dashboard sessions count if available
+            if ((window as any).refreshDashboardSessionsCount) {
+                (window as any).refreshDashboardSessionsCount();
+            }
         } catch (error: any) {
             toast({
                 title: "Error",
@@ -147,15 +207,40 @@ export const CreateSessionDialog = ({
                     </div>
 
                     {isOnline ? (
-                        <div className="space-y-2">
-                            <Label htmlFor="link">Meeting Link</Label>
-                            <Input
-                                id="link"
-                                type="url"
-                                value={meetingLink}
-                                onChange={(e) => setMeetingLink(e.target.value)}
-                                placeholder="https://zoom.us/..."
-                            />
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                    <Video className="h-4 w-4 text-blue-600" />
+                                    <Label htmlFor="zoom" className="text-sm font-medium">Auto-create Zoom Meeting</Label>
+                                </div>
+                                <Switch
+                                    id="zoom"
+                                    checked={useZoom}
+                                    onCheckedChange={setUseZoom}
+                                />
+                            </div>
+                            
+                            {!useZoom && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="link">Meeting Link</Label>
+                                    <Input
+                                        id="link"
+                                        type="url"
+                                        value={meetingLink}
+                                        onChange={(e) => setMeetingLink(e.target.value)}
+                                        placeholder="https://zoom.us/... or other meeting link"
+                                    />
+                                </div>
+                            )}
+                            
+                            {useZoom && (
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                    <div className="flex items-center space-x-2 text-sm text-blue-700">
+                                        <Video className="h-4 w-4" />
+                                        <span>A Zoom meeting will be automatically created when you save this session</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ) : (
                         <div className="space-y-2">
@@ -180,10 +265,17 @@ export const CreateSessionDialog = ({
                         </Button>
                         <Button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || creatingZoomMeeting}
                             className="flex-1 bg-gradient-primary"
                         >
-                            {loading ? "Creating..." : "Create Session"}
+                            {loading || creatingZoomMeeting ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    {creatingZoomMeeting ? "Creating Zoom meeting..." : "Creating..."}
+                                </>
+                            ) : (
+                                "Create Session"
+                            )}
                         </Button>
                     </div>
                 </form>
