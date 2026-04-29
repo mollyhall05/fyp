@@ -65,10 +65,12 @@ export const SessionList = ({ groupId }: SessionListProps) => {
     const loadSessions = async () => {
         try {
             setLoading(true);
+            const now = new Date().toISOString();
             const { data, error } = await supabase
                 .from("study_sessions")
                 .select("*")
                 .eq("group_id", groupId)
+                .gte("datetime", now) // Only future sessions
                 .order("datetime", { ascending: true });
 
             if (error) throw error;

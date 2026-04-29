@@ -12,7 +12,7 @@ import {
     Settings,
     LayoutDashboard,
     LogOut,
-    ChevronRight,
+    ChevronDown,
     UserPlus, UserCheck
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -21,6 +21,7 @@ import { SessionList } from "@/components/SessionList";
 import { CreateSessionDialog } from "@/components/CreateSessionDialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
 
 const Group = () => {
     const { id } = useParams();
@@ -36,6 +37,10 @@ const Group = () => {
 
     // Load user data on component mount
     useEffect(() => {
+        // Set body background to match dashboard
+        document.body.style.backgroundColor = '#ccfbf1';
+        document.body.style.backgroundAttachment = 'fixed';
+        
         const getUser = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             setUser(user);
@@ -238,154 +243,181 @@ const Group = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/10">
-            {/* Simple Navbar */}
-            <nav className="fixed top-0 left-0 right-0 z-50 bg-teal-700 shadow-lg">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        <Link to="/dashboard" className="flex items-center text-white hover:text-teal-200 transition-colors">
-                            <LayoutDashboard className="h-5 w-5 mr-2" />
-                            <span className="font-medium">Dashboard</span>
-                        </Link>
-                        
-                        <div className="flex items-center space-x-4">
-                            <div className="relative">
-                                <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    className="text-white hover:text-teal-200"
-                                    onClick={() => setShowProfile(!showProfile)}
-                                >
-                                    <User className="h-4 w-4 mr-2" />
-                                    Profile
-                                    <ChevronRight className={`h-4 w-4 ml-1 transition-transform ${showProfile ? 'rotate-180' : ''}`} />
-                                </Button>
-                                
-                                {/* Profile Dropdown */}
-                                {showProfile && (
-                                    <div className="absolute right-0 mt-2 w-64 bg-card rounded-lg shadow-lg border border-border py-2 z-[9999]">
-                                        {/* User Info Section */}
-                                        <div className="px-4 py-3 border-b border-border">
-                                            <div className="flex items-center space-x-3">
-                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-foreground font-semibold">
-                                                    {user?.user_metadata?.full_name ? user.user_metadata.full_name.split(' ').map(n => n[0]).join('').toUpperCase() : user?.email?.[0]?.toUpperCase() || 'U'}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-foreground truncate">
-                                                        {user?.user_metadata?.full_name || 'No name set'}
-                                                    </p>
-                                                    <p className="text-xs text-muted-foreground truncate">
-                                                        {user?.email || 'No email'}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        {/* Menu Items */}
-                                        <button
-                                            onClick={() => {
-                                                setShowProfile(false);
-                                                navigate('/profile/edit');
-                                            }}
-                                            className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted/50 flex items-center"
-                                        >
-                                            <Settings className="h-4 w-4 mr-2" />
-                                            Edit Profile Details
-                                        </button>
-                                        <div className="border-t border-border my-1"></div>
-                                        <button
-                                            onClick={() => {
-                                                setShowProfile(false);
-                                                toast({
-                                                    title: "Account Settings",
-                                                    description: "Account settings feature coming soon!",
-                                                });
-                                            }}
-                                            className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted/50 flex items-center"
-                                        >
-                                            <Settings className="h-4 w-4 mr-2" />
-                                            Account Settings
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                            <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={handleSignOut}
-                                className="text-foreground hover:text-destructive transition-colors"
-                            >
-                                <LogOut className="h-4 w-4 mr-2" />
-                                Logout
-                            </Button>
+        <div className="min-h-screen" style={{ backgroundColor: '#ccfbf1' }}>
+            {/* Simple Header - Same as Dashboard */}
+            <div className="fixed top-6 left-0 right-0 z-50 flex justify-between items-start px-6">
+                {/* Home Button */}
+                <Button
+                    variant="ghost"
+                    onClick={() => navigate('/dashboard')}
+                    className="bg-transparent hover:bg-transparent text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition-all duration-300 px-6 py-3 text-lg font-medium no-focus-border"
+                >
+                    <LayoutDashboard className="h-6 w-6 mr-3" />
+                    Home
+                </Button>
+                
+                {/* Profile Button */}
+                <div className="relative">
+                    <Button
+                        variant="ghost"
+                        onClick={() => setShowProfile(!showProfile)}
+                        className="bg-transparent hover:bg-transparent text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition-all duration-300 px-6 py-3 text-lg font-medium no-focus-border"
+                    >
+                        <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900/30 rounded-full flex items-center justify-center text-teal-600 dark:text-teal-400 font-semibold text-base mr-3">
+                            {user?.user_metadata?.full_name ? user.user_metadata.full_name.split(' ').map(n => n[0]).join('').toUpperCase() : user?.email?.[0]?.toUpperCase() || 'U'}
                         </div>
-                    </div>
+                        Profile
+                        <ChevronDown className={`h-5 w-5 ml-2 transition-transform ${showProfile ? 'rotate-180' : ''}`} />
+                    </Button>
+                    
+                    {/* Profile Dropdown */}
+                    {showProfile && (
+                        <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+                        >
+                            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                                <p className="font-medium text-gray-900 dark:text-white">
+                                    {user?.user_metadata?.full_name || user?.email}
+                                </p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    {user?.email}
+                                </p>
+                            </div>
+                            <div className="p-2">
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => {
+                                        setShowProfile(false);
+                                        navigate('/profile/edit');
+                                    }}
+                                    className="w-full justify-start text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+                                >
+                                    <Settings className="h-4 w-4 mr-2" />
+                                    Edit Profile Details
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    onClick={handleSignOut}
+                                    className="w-full justify-start text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+                                >
+                                    <LogOut className="h-4 w-4 mr-2" />
+                                    Sign out
+                                </Button>
+                            </div>
+                        </motion.div>
+                    )}
                 </div>
-            </nav>
+            </div>
 
             {/* Main Content */}
-            <div className="pt-24 pb-8">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center mb-8">
-                        <div>
-                            <h2 className="text-4xl font-bold text-foreground">{group.name}</h2>
-                            <p className="mt-2 text-lg text-muted-foreground">{group.subject || 'Study group'}</p>
-                        </div>
-                    </div>
-
-                    <Tabs defaultValue="sessions" className="w-full">
-                        <TabsList className="bg-transparent p-4 flex justify-center space-x-8 relative z-10">
-                            <TabsTrigger
-                                value="sessions"
-                                className="data-[state=active]:bg-teal-700 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 font-semibold text-lg py-4 px-8 rounded-xl h-16 data-[state=inactive]:bg-gray-100/50 border border-gray-300"
-                            >
-                                <CalendarIcon className="mr-4 h-6 w-6" />
-                                Sessions
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="chat"
-                                className="data-[state=active]:bg-teal-700 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 font-semibold text-lg py-4 px-8 rounded-xl h-16 data-[state=inactive]:bg-gray-100/50 border border-gray-300"
-                            >
-                                <MessageSquare className="mr-4 h-6 w-6" />
-                                Chat
-                            </TabsTrigger>
-                            <TabsTrigger
-                                value="members"
-                                className="data-[state=active]:bg-teal-700 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 font-semibold text-lg py-4 px-8 rounded-xl h-16 data-[state=inactive]:bg-gray-100/50 border border-gray-300"
-                            >
-                                <Users className="mr-4 h-6 w-6" />
-                                Members
-                            </TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent value="sessions" className="mt-0">
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <main className="py-6">
+                <div className="max-w-6xl mx-auto px-6">
+                    {/* Group Header */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-8"
+                    >
+                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
+                            <div className="flex items-start justify-between mb-6">
                                 <div>
-                                    <h3 className="text-xl font-medium text-foreground">Study Sessions</h3>
-                                    <p className="text-base text-muted-foreground">View and manage your study sessions</p>
+                                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                                        {group.name}
+                                    </h1>
+                                    <p className="text-gray-600 dark:text-gray-300 text-lg">
+                                        {group.subject || 'Study group'}
+                                    </p>
                                 </div>
-                                <Button
-                                    onClick={() => setShowCreateSession(true)}
-                                    className="bg-teal-700 hover:bg-teal-600 text-white py-3 text-base px-6"
-                                >
-                                    <Plus className="mr-2 h-5 w-5" />
-                                    Schedule Session
+                                <div className="flex items-center gap-4">
+                                    <Badge variant="secondary" className="text-lg px-3 py-1">
+                                        {group.member_count || members.length} members
+                                    </Badge>
+                                    {group.is_public && (
+                                        <Badge variant="outline" className="text-lg px-3 py-1">
+                                            Public
+                                        </Badge>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            {/* Group Actions */}
+                            <div className="flex gap-3">
+                                <Button className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 transition-all duration-300 shadow-lg hover:shadow-xl border-0 text-white px-6">
+                                    <UserPlus className="h-4 w-4 mr-2" />
+                                    Invite Members
+                                </Button>
+                                <Button variant="outline" className="border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
+                                    <Settings className="h-4 w-4 mr-2" />
+                                    Settings
                                 </Button>
                             </div>
-                            <div className="bg-gradient-to-br from-background/80 via-background/90 to-muted/5 backdrop-blur-md border border-border/10 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
-                                <SessionList groupId={id!} />
+                        </div>
+                    </motion.div>
+
+                    {/* Group Content Tabs */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <Tabs defaultValue="sessions" className="space-y-6">
+                            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6">
+                                <TabsList className="grid w-full grid-cols-3 bg-transparent border-b border-gray-200 dark:border-gray-700 rounded-none h-auto p-0">
+                                    <TabsTrigger 
+                                        value="sessions" 
+                                        className="data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent px-1 py-3 rounded-none text-muted-foreground data-[state=active]:text-foreground"
+                                    >
+                                        <CalendarIcon className="h-4 w-4 mr-2" />
+                                        Sessions
+                                    </TabsTrigger>
+                                    <TabsTrigger 
+                                        value="chat" 
+                                        className="data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent px-1 py-3 rounded-none text-muted-foreground data-[state=active]:text-foreground"
+                                    >
+                                        <MessageSquare className="h-4 w-4 mr-2" />
+                                        Chat
+                                    </TabsTrigger>
+                                    <TabsTrigger 
+                                        value="members" 
+                                        className="data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent px-1 py-3 rounded-none text-muted-foreground data-[state=active]:text-foreground"
+                                    >
+                                        <Users className="h-4 w-4 mr-2" />
+                                        Members
+                                    </TabsTrigger>
+                                </TabsList>
                             </div>
-                        </TabsContent>
+
+                        <div className="mt-6">
+                                    <TabsContent value="sessions" className="mt-0">
+                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                                            <div>
+                                                <h3 className="text-xl font-medium text-foreground">Study Sessions</h3>
+                                                <p className="text-base text-muted-foreground">View and manage your study sessions</p>
+                                            </div>
+                                            <Button
+                                                onClick={() => setShowCreateSession(true)}
+                                                className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 transition-all duration-300 shadow-lg hover:shadow-xl border-0 text-white px-6"
+                                            >
+                                                <Plus className="mr-2 h-5 w-5" />
+                                                Schedule Session
+                                            </Button>
+                                        </div>
+                                        <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                                            <SessionList groupId={id!} />
+                                        </div>
+                                    </TabsContent>
 
                         <TabsContent value="chat" className="mt-0">
-                            <div className="bg-gradient-to-br from-background/80 via-background/90 to-muted/5 backdrop-blur-md border border-border/10 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
+                            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
                                 <GroupChat groupId={id!} />
                             </div>
                         </TabsContent>
 
                         <TabsContent value="members" className="mt-0">
-                            <div className="bg-gradient-to-br from-background/80 via-background/90 to-muted/5 backdrop-blur-md border border-border/10 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
-                                <div className="p-6 border-b border-border/20">
+                            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                                     <div className="flex justify-between items-center">
                                         <div>
                                             <h3 className="text-xl font-medium text-foreground">Group Members</h3>
@@ -393,29 +425,29 @@ const Group = () => {
                                                 {members.length} {members.length === 1 ? 'member' : 'members'} in this group
                                             </p>
                                         </div>
-                                        <Button variant="outline" size="default" className="border-border py-2 px-4">
+                                        <Button variant="outline" size="default" className="border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 py-2 px-4">
                                             <UserPlus className="mr-2 h-5 w-5" />
                                             Invite
                                         </Button>
                                     </div>
                                 </div>
-                                <div className="divide-y divide-border">
+                                <div className="divide-y divide-gray-200 dark:divide-gray-700">
                                     {members.map((member) => (
                                         <div
                                             key={member.id}
-                                            className="p-4 hover:bg-muted/50 transition-colors duration-150"
+                                            className="p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150"
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center space-x-4">
                                                     <div className="relative">
                                                         <Avatar className="h-10 w-10">
-                                                            <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground font-semibold">
+                                                            <AvatarFallback className="bg-gradient-to-br from-teal-500 to-teal-600 text-white font-semibold">
                                                                 {member.profiles?.username?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 
                                                                  member.profiles?.email?.[0]?.toUpperCase() || '?'}
                                                             </AvatarFallback>
                                                         </Avatar>
                                                         {member.is_creator && (
-                                                            <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground p-0.5 rounded-full">
+                                                            <div className="absolute -bottom-1 -right-1 bg-teal-600 text-white p-0.5 rounded-full">
                                                                 <UserCheck className="h-3 w-3" />
                                                             </div>
                                                         )}
@@ -434,7 +466,7 @@ const Group = () => {
                                                 {(member.role === 'admin' || member.is_creator) && (
                                                     <Badge 
                                                         variant={member.is_creator ? 'default' : 'outline'}
-                                                        className={`${member.is_creator ? 'bg-primary/20 text-primary border-primary/30' : 'border-border text-foreground'}`}
+                                                        className={`${member.is_creator ? 'bg-teal-600 text-white border-teal-600' : 'border-gray-300 text-foreground'}`}
                                                     >
                                                         {member.is_creator ? 'Creator' : 'Admin'}
                                                     </Badge>
@@ -445,9 +477,11 @@ const Group = () => {
                                 </div>
                             </div>
                         </TabsContent>
-                    </Tabs>
+                            </div>
+                        </Tabs>
+                    </motion.div>
                 </div>
-            </div>
+            </main>
 
                 <CreateSessionDialog
                 open={showCreateSession}
@@ -455,7 +489,7 @@ const Group = () => {
                 groupId={id!}
                 onSuccess={() => setShowCreateSession(false)}
             />
-    </div>
+        </div>
     );
 };
 
