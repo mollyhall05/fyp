@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, Apple, CalendarPlus, Calendar as CalendarIcon2, ExternalLink, Clock, MapPin, Video, Loader2, Sparkles } from "lucide-react";
+import { Calendar as CalendarIcon, Apple, CalendarPlus, ExternalLink, Clock, MapPin, Video, Loader2, Sparkles } from "lucide-react";
 import { addToCalendar, addToGoogleCalendar } from "@/lib/calendar";
 import { motion } from "framer-motion";
 import {
@@ -19,6 +19,7 @@ interface CalendarEvent {
   start: string;
   end: string;
   extendedProps: {
+    meetingLink: any;
     description?: string;
     location?: string;
     isOnline: boolean;
@@ -26,9 +27,27 @@ interface CalendarEvent {
   };
 }
 
-export const CalendarView = () => {
+interface SessionData {
+  id: string;
+  title: string;
+  datetime: string;
+  duration_minutes: number;
+  description?: string;
+  location?: string;
+  meeting_link?: string;
+  is_online: boolean;
+  groups?: {
+    name: string;
+  };
+}
+
+type CalendarProvider = 'default' | 'google' | 'apple';
+
+const CalendarView = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -82,7 +101,7 @@ export const CalendarView = () => {
         }
       }));
 
-      setEvents(calendarEvents);
+      // setEvents(calendarEvents);
     } catch (error: any) {
       console.error('Error fetching sessions:', error);
       toast({
@@ -96,25 +115,25 @@ export const CalendarView = () => {
   };
 
   const renderEventCard = (event: CalendarEvent) => {
-    const handleAddToCalendar = async (provider: 'default' | 'google' | 'apple' = 'default') => {
+    const handleAddToCalendar = async (provider: CalendarProvider = 'default') => {
       try {
         let result;
         if (provider === 'google') {
-          result = await addToGoogleCalendar({
-            title: event.title,
-            description: event.extendedProps.description,
-            start: event.start,
-            end: event.end,
-            location: event.extendedProps.location,
-            isOnline: event.extendedProps.isOnline,
-            meetingLink: event.extendedProps.meetingLink
+          result = addToGoogleCalendar({
+              title: event.title,
+              description: event.extendedProps.description,
+              start: event.start,
+              end: event.end,
+              location: event.extendedProps.location,
+              isOnline: event.extendedProps.isOnline,
+              meetingLink: event.extendedProps.meetingLink
           });
         } else {
           result = await addToCalendar({
             title: event.title,
             description: event.extendedProps.description,
-            start: event.start,
-            end: event.end,
+            start: new Date(event.start),
+            end: new Date(event.end),
             location: event.extendedProps.location,
             isOnline: event.extendedProps.isOnline,
             meetingLink: event.extendedProps.meetingLink
@@ -137,7 +156,7 @@ export const CalendarView = () => {
 
     return (
       <motion.div 
-        className="p-4 bg-card border border-primary/20 rounded-xl hover:border-primary/40 transition-all duration-300 shadow-sm hover:shadow-md cursor-pointer"
+        className="p-6 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-purple-600/20 hover:border-purple-600/40 transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 rounded-xl cursor-pointer"
         whileHover={{ scale: 1.02, y: -2 }}
         transition={{ duration: 0.2 }}
         onClick={() => window.location.href = `/session/${event.id}`}
@@ -220,7 +239,7 @@ export const CalendarView = () => {
                 e.stopPropagation();
                 handleAddToCalendar('default');
               }}>
-                <CalendarIcon2 className="mr-2 h-4 w-4" />
+                <CalendarIcon className="mr-2 h-4 w-4" />
                 <span>Add to Calendar</span>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => {
@@ -248,10 +267,39 @@ export const CalendarView = () => {
     );
   };
 
+  if (error) {
+    return (
+      <motion.div 
+        className="flex flex-col justify-center items-center py-16 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-purple-600/20 rounded-2xl"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="p-4 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white mb-4">
+          <CalendarIcon className="h-8 w-8" />
+        </div>
+        <h3 className="text-lg font-semibold text-foreground mb-2">Failed to load sessions</h3>
+        <p className="text-sm text-muted-foreground text-center max-w-md mb-6">
+          {error}
+        </p>
+        <Button 
+          onClick={() => {
+            setRetryCount(0);
+            setError(null);
+            fetchSessions();
+          }}
+          className="bg-teal-700 hover:bg-teal-600 text-white"
+        >
+          Try Again
+        </Button>
+      </motion.div>
+    );
+  }
+
   if (loading) {
     return (
       <motion.div 
-        className="flex flex-col justify-center items-center h-96 bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-md rounded-2xl border border-primary/20"
+        className="flex flex-col justify-center items-center h-96 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md rounded-2xl border border-purple-600/20"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
@@ -291,11 +339,11 @@ export const CalendarView = () => {
       transition={{ duration: 0.5 }}
     >
       {/* Calendar Header */}
-      <div className="mb-6 p-4 bg-card border border-primary/20 rounded-xl shadow-sm">
+      <div className="mb-6 p-6 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-purple-600/20 rounded-xl shadow-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-gradient-to-r from-blue-600 to-teal-500 text-white">
-              <CalendarIcon className="h-5 w-5" />
+            <div className="p-3 rounded-xl bg-teal-700 text-white">
+              <CalendarIcon className="h-6 w-6" />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-foreground">Study Sessions Calendar</h3>
@@ -303,9 +351,19 @@ export const CalendarView = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-200">
-              {events.length} Sessions
+            <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-200">
+              {events.length} Upcoming {events.length === 1 ? 'Session' : 'Sessions'}
             </Badge>
+            {events.length > 0 && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => window.location.href = '/dashboard'}
+                className="text-xs"
+              >
+                Create New Session
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -339,12 +397,29 @@ export const CalendarView = () => {
               <CalendarIcon className="h-8 w-8" />
             </div>
             <h3 className="text-lg font-semibold text-foreground mb-2">No upcoming sessions</h3>
-            <p className="text-sm text-muted-foreground text-center max-w-md">
+            <p className="text-sm text-muted-foreground text-center max-w-md mb-6">
               You don't have any study sessions scheduled. Join a study group or create a new session to get started!
             </p>
+            <div className="flex gap-3">
+              <Button 
+                onClick={() => window.location.href = '/dashboard'}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
+                <CalendarPlus className="mr-2 h-4 w-4" />
+                Create Session
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => window.location.href = '/dashboard#discover'}
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                Discover Groups
+              </Button>
+            </div>
           </motion.div>
         )}
       </motion.div>
     </motion.div>
   );
 };
+export default CalendarView

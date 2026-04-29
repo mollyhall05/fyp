@@ -1,37 +1,16 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { 
-  Users, 
-  Plus, 
-  LogOut, 
-  User, 
-  ChevronDown, 
-  Calendar as CalendarIcon, 
-  Search,
-  Bell,
-  Home,
-  BookOpen,
-  LayoutDashboard,
-  Settings,
-  ChevronRight
-} from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Users, Plus, LogOut, User, ChevronDown, LayoutDashboard, Settings } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { CreateGroupDialog } from "@/components/CreateGroupDialog";
 import { GroupCard } from "@/components/GroupCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CalendarView } from "@/components/CalendarView";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Navbar } from "@/components/Navbar";
-
-// Import shared styles and animations
-import { fadeIn, staggerContainer, itemFadeIn } from "@/styles/animations";
-import { cardStyles, buttonStyles, typography, sectionSpacing } from "@/styles/layout";
+import CalendarView from "@/components/CalendarView";
+import { itemFadeIn } from "@/styles/animations";
 
 interface StudyGroup {
     id: string;
@@ -143,7 +122,7 @@ const Dashboard = () => {
         // Refresh the groups list to show the newly created group
         loadGroups();
         loadUpcomingSessionsCount();
-        // Show success message
+        // Show the success message
         toast({
             title: "Group created successfully!",
             description: "Your new study group has been created.",
@@ -246,14 +225,14 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/5">
+        <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-primary/15">
             {/* Simple Navbar */}
-            <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm relative z-[9998]">
+            <nav className="bg-card/90 backdrop-blur-sm border-b border-border shadow-sm relative z-[9998]">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
-                        <div className="flex items-center text-gray-700">
-                            <LayoutDashboard className="h-5 w-5 mr-2" />
-                            <span className="font-medium">StudySync</span>
+                        <div className="flex items-center text-foreground/90">
+                            <LayoutDashboard className="h-5 w-5 mr-2 text-accent-purple" />
+                            <span className="font-medium text-foreground/95">StudySync</span>
                         </div>
                         
                         <div className="flex items-center space-x-4">
@@ -261,7 +240,7 @@ const Dashboard = () => {
                                 <Button 
                                     variant="ghost" 
                                     size="sm" 
-                                    className="text-gray-700 hover:text-gray-900"
+                                    className="text-foreground hover:text-primary"
                                     onClick={() => setShowProfile(!showProfile)}
                                 >
                                     <User className="h-4 w-4 mr-2" />
@@ -271,18 +250,18 @@ const Dashboard = () => {
                                 
                                 {/* Profile Dropdown */}
                                 {showProfile && (
-                                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200/50 py-2 z-[9999]">
+                                    <div className="absolute right-0 mt-2 w-64 bg-card rounded-lg shadow-lg border border-border py-2 z-[9999]">
                                         {/* User Info Section */}
-                                        <div className="px-4 py-3 border-b border-gray-200/50">
+                                        <div className="px-4 py-3 border-b border-border">
                                             <div className="flex items-center space-x-3">
-                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold">
+                                                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-foreground font-semibold">
                                                     {user?.user_metadata?.full_name ? user.user_metadata.full_name.split(' ').map(n => n[0]).join('').toUpperCase() : user?.email?.[0]?.toUpperCase() || 'U'}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-gray-900 truncate">
+                                                    <p className="text-sm font-medium text-foreground truncate">
                                                         {user?.user_metadata?.full_name || 'No name set'}
                                                     </p>
-                                                    <p className="text-xs text-gray-500 truncate">
+                                                    <p className="text-xs text-muted-foreground truncate">
                                                         {user?.email || 'No email'}
                                                     </p>
                                                 </div>
@@ -295,12 +274,12 @@ const Dashboard = () => {
                                                 setShowProfile(false);
                                                 navigate('/profile/edit');
                                             }}
-                                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                                            className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted/50 flex items-center"
                                         >
                                             <Settings className="h-4 w-4 mr-2" />
                                             Edit Profile Details
                                         </button>
-                                        <div className="border-t border-gray-200/50 my-1"></div>
+                                        <div className="border-t border-border my-1"></div>
                                         <button
                                             onClick={() => {
                                                 setShowProfile(false);
@@ -309,7 +288,7 @@ const Dashboard = () => {
                                                     description: "Account settings feature coming soon!",
                                                 });
                                             }}
-                                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center"
+                                            className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted/50 flex items-center"
                                         >
                                             <Settings className="h-4 w-4 mr-2" />
                                             Account Settings
@@ -321,7 +300,7 @@ const Dashboard = () => {
                                 variant="ghost" 
                                 size="sm" 
                                 onClick={handleSignOut}
-                                className="text-gray-700 hover:text-red-600 transition-colors"
+                                className="text-foreground hover:text-destructive transition-colors"
                             >
                                 <LogOut className="h-4 w-4 mr-2" />
                                 Logout
@@ -347,17 +326,17 @@ const Dashboard = () => {
                     >
                         <div>
                             <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                                <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-teal-500 bg-clip-text text-transparent">
+                                <span className="text-foreground">
                                     Dashboard
                                 </span>
                             </h1>
-                            <p className="text-lg text-muted-foreground">
+                            <p className="text-lg text-foreground/60">
                                 Welcome back! Here's what's happening with your study groups.
                             </p>
                         </div>
                         <Button 
                             onClick={() => setShowCreateDialog(true)}
-                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl border-0 text-white"
+                            className="bg-teal-700 hover:bg-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0 text-white"
                         >
                             <Plus className="h-4 w-4 mr-2" />
                             Create Group
@@ -367,50 +346,50 @@ const Dashboard = () => {
             </section>
 
             {/* Main Content */}
-            <main className="py-8">
-                <div className="container mx-auto max-w-6xl px-4">
+            <main className="py-6">
+                <div className="container mx-auto max-w-6xl px-6">
                         {/* Stats Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                            <Card className="bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-md border border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                                <CardContent className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+                            <Card className="bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-teal-600/20 hover:border-teal-600/40 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <CardContent className="p-8">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm font-medium text-muted-foreground">Your Groups</p>
+                                            <p className="text-sm font-medium text-foreground/70">Your Groups</p>
                                             <p className="text-2xl font-semibold">
                                                 {loading ? '--' : myGroups.length}
                                             </p>
                                         </div>
-                                        <div className="p-3 rounded-xl bg-gradient-to-br from-blue-600 to-blue-500 text-white shadow-lg">
+                                        <div className="p-3 rounded-xl bg-teal-700 text-white shadow-lg">
                                             <Users className="h-6 w-6" />
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
-                            <Card className="bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-md border border-secondary/20 hover:border-secondary/40 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                                <CardContent className="p-6">
+                            <Card className="bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-purple-600/20 hover:border-purple-600/40 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <CardContent className="p-8">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm font-medium text-muted-foreground">Upcoming Sessions</p>
+                                            <p className="text-sm font-medium text-foreground/70">Upcoming Sessions</p>
                                             <p className="text-2xl font-semibold">
                                                 {loading ? '--' : upcomingSessionsCount}
                                             </p>
                                         </div>
-                                        <div className="p-3 rounded-xl bg-gradient-to-br from-teal-600 to-teal-500 text-white shadow-lg">
-                                            <CalendarIcon className="h-6 w-6" />
+                                        <div className="p-3 rounded-xl bg-teal-700 text-white shadow-lg">
+                                            <Users className="h-6 w-6" />
                                         </div>
                                     </div>
                                 </CardContent>
                             </Card>
-                            <Card className="bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-md border border-accent/20 hover:border-accent/40 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                                <CardContent className="p-6">
+                            <Card className="bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-purple-600/20 hover:border-purple-600/40 transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
+                                <CardContent className="p-8">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm font-medium text-muted-foreground">Available Groups</p>
+                                            <p className="text-sm font-medium text-foreground/70">Available Groups</p>
                                             <p className="text-2xl font-semibold">
                                                 {loading ? '--' : groups.length}
                                             </p>
                                         </div>
-                                        <div className="p-3 rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 text-white shadow-lg">
+                                        <div className="p-3 rounded-xl bg-purple-600 text-white shadow-lg">
                                             <Users className="h-6 w-6" />
                                         </div>
                                     </div>
@@ -440,7 +419,7 @@ const Dashboard = () => {
                                         Discover Groups
                                     </TabsTrigger>
                                 </TabsList>
-                                <div className="text-sm text-muted-foreground">
+                                <div className="text-sm text-foreground/60">
                                     {loading ? (
                                         <div className="h-4 w-32 bg-muted rounded animate-pulse"></div>
                                     ) : (
@@ -451,11 +430,11 @@ const Dashboard = () => {
 
                             <TabsContent value="groups" className="mt-8">
                                 {loading ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                         {[1, 2, 3].map((i) => (
                                             <Card key={i} className="bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-md border border-primary/20">
                                                 <div className="h-32 bg-muted rounded-t-lg animate-pulse"></div>
-                                                <CardContent className="p-6">
+                                                <CardContent className="p-8">
                                                     <div className="h-6 bg-muted rounded w-3/4 mb-2 animate-pulse"></div>
                                                     <div className="h-4 bg-muted rounded w-1/2 mb-4 animate-pulse"></div>
                                                     <div className="h-10 bg-muted rounded w-full animate-pulse"></div>
@@ -464,7 +443,7 @@ const Dashboard = () => {
                                         ))}
                                     </div>
                                 ) : myGroups.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                         {myGroups.map((group) => (
                                             <motion.div
                                                 key={group.id}
@@ -484,14 +463,14 @@ const Dashboard = () => {
                                     </div>
                                 ) : (
                                     <div className="text-center py-12 bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-md rounded-2xl border border-primary/20">
-                                        <div className="p-3 rounded-xl bg-gradient-to-br from-blue-600 to-blue-500 text-white w-fit mx-auto mb-4">
+                                        <div className="p-3 rounded-xl bg-teal-700 text-white w-fit mx-auto mb-4">
                                             <Users className="h-8 w-8" />
                                         </div>
                                         <h3 className="text-lg font-semibold mb-2">No groups yet</h3>
                                         <p className="text-muted-foreground mb-6">Get started by joining or creating a study group.</p>
                                         <Button
                                             onClick={() => setShowCreateDialog(true)}
-                                            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl border-0 text-white"
+                                            className="bg-teal-700 hover:bg-teal-600 transition-all duration-300 shadow-lg hover:shadow-xl border-0 text-white"
                                         >
                                             <Plus className="h-4 w-4 mr-2" />
                                             Create Group
@@ -501,15 +480,15 @@ const Dashboard = () => {
                             </TabsContent>
 
                             <TabsContent value="calendar" className="mt-0">
-                                <Card className="bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-md border border-primary/20">
-                                    <CardContent className="p-6">
+                                <Card className="bg-gradient-to-br from-background via-background to-muted/10 backdrop-blur-md border border-teal-600/20 hover:border-teal-600/40 transition-all duration-300 hover:shadow-xl">
+                                    <CardContent className="p-8">
                                         <CalendarView />
                                     </CardContent>
                                 </Card>
                             </TabsContent>
 
                             <TabsContent value="discover" className="mt-8">
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                     {groups.filter(g => !myGroups.some(mg => mg.id === g.id)).map((group) => (
                                         <motion.div
                                             key={group.id}

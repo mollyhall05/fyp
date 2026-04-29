@@ -165,7 +165,7 @@ const Auth = () => {
         <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
             {/* Animated Background */}
             <div className="absolute inset-0 -z-10">
-                <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/5 to-secondary/5">
+                <div className="absolute inset-0 bg-gradient-to-br from-background via-primary/70 to-secondary/70">
                     <div className="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:20px_20px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 dark:opacity-[0.05]"></div>
                 </div>
                 <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-primary/30 to-secondary/20 rounded-full blur-3xl animate-pulse"></div>
@@ -182,14 +182,14 @@ const Auth = () => {
                 >
                     <Link to="/" className="flex items-center justify-center gap-3 group">
                         <motion.div 
-                            className="bg-gradient-to-r from-blue-600 to-teal-500 p-3 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300"
+                            className="bg-teal-700 p-3 rounded-2xl shadow-lg group-hover:shadow-xl transition-all duration-300"
                             whileHover={{ scale: 1.05, rotate: 5 }}
                             whileTap={{ scale: 0.95 }}
                         >
                             <Users className="h-8 w-8 text-white" />
                         </motion.div>
                         <motion.span 
-                            className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-teal-500 to-orange-500 bg-clip-text text-transparent"
+                            className="text-3xl font-bold text-foreground"
                             whileHover={{ scale: 1.02 }}
                         >
                             StudySync
@@ -212,7 +212,7 @@ const Auth = () => {
                     className="relative"
                 >
                     {/* Glow effect behind card */}
-                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 to-teal-500/20 rounded-3xl blur-xl opacity-50"></div>
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-3xl blur-xl opacity-50"></div>
                     
                     <Card className="relative bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-primary/20 shadow-2xl">
                         <CardHeader className="text-center pb-6">
@@ -222,7 +222,7 @@ const Auth = () => {
                                 transition={{ duration: 0.5, delay: 0.2 }}
                                 key={activeTab}
                             >
-                                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-teal-500 bg-clip-text text-transparent">
+                                <CardTitle className="text-2xl font-bold text-foreground">
                                     {activeTab === "signin" ? "Welcome Back" : "Join StudySync"}
                                 </CardTitle>
                                 <CardDescription className="text-muted-foreground mt-2">
@@ -238,13 +238,13 @@ const Auth = () => {
                                 <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-muted/50 to-muted/30 rounded-xl backdrop-blur-sm border border-primary/10 p-0 h-12">
                                     <TabsTrigger 
                                         value="signin" 
-                                        className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-teal-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 font-medium h-full rounded-l-xl rounded-r-none data-[state=inactive]:bg-transparent"
+                                        className="data-[state=active]:bg-teal-700 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 font-medium h-full rounded-l-xl rounded-r-none data-[state=inactive]:bg-transparent"
                                     >
                                         Sign In
                                     </TabsTrigger>
                                     <TabsTrigger 
                                         value="signup" 
-                                        className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-teal-500 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 font-medium h-full rounded-r-xl rounded-l-none data-[state=inactive]:bg-transparent"
+                                        className="data-[state=active]:bg-teal-700 data-[state=active]:text-white data-[state=active]:shadow-lg transition-all duration-300 font-medium h-full rounded-r-xl rounded-l-none data-[state=inactive]:bg-transparent"
                                     >
                                         Sign Up
                                     </TabsTrigger>
@@ -302,7 +302,7 @@ const Auth = () => {
                                         >
                                             <Button
                                                 type="submit"
-                                                className="w-full bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white font-medium py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-0"
+                                                className="w-full bg-teal-700 hover:bg-teal-600 text-white font-medium py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-0"
                                                 disabled={loading}
                                             >
                                                 {loading ? (
@@ -434,7 +434,7 @@ const Auth = () => {
                                         >
                                             <Button
                                                 type="submit"
-                                                className="w-full bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white font-medium py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-0"
+                                                className="w-full bg-teal-700 hover:bg-teal-600 text-white font-medium py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-0"
                                                 disabled={loading}
                                             >
                                                 {loading ? (

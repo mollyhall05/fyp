@@ -99,7 +99,15 @@ const escapeContent = (content: string) => {
 };
 
 // Google Calendar helper
-export const addToGoogleCalendar = (event: CalendarEvent) => {
+export const addToGoogleCalendar = (event: {
+    title: string;
+    description: string;
+    start: string;
+    end: string;
+    location: string;
+    isOnline: boolean;
+    meetingLink: any
+}) => {
   const startDate = event.start.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   const endDate = event.end.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   

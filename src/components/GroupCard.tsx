@@ -153,8 +153,8 @@ export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCard
             variants={cardVariants}
             className="h-full"
         >
-            <Card className={`${cardStyles.base} ${cardStyles.hover} h-full flex flex-col`}>
-                <CardHeader className="pb-3">
+            <Card className="bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-border/20 hover:border-border/40 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col">
+                <CardHeader className="pb-4">
                     <div className="flex items-start justify-between">
                         <div className="flex-1">
                             <CardTitle className={typography.h3}>
@@ -169,8 +169,8 @@ export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCard
                         </div>
                     </div>
                 </CardHeader>
-                <CardContent className="flex-1 flex flex-col">
-                    <CardDescription className="mb-4 line-clamp-3 flex-1">
+                <CardContent className="flex-1 flex flex-col p-6">
+                    <CardDescription className="mb-6 line-clamp-3 flex-1 text-base">
                         {group.description || "No description provided"}
                     </CardDescription>
 
@@ -183,10 +183,10 @@ export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCard
                         {isMember ? (
                             <Button 
                                 onClick={handleViewGroup}
-                                className={`w-full ${buttonStyles.primary} group`}
+                                className="w-full bg-teal-700 hover:bg-teal-600 text-white transition-all duration-300 shadow-lg hover:shadow-xl border-0 group py-3 text-base"
                             >
                                 View Group
-                                <ChevronRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                                <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                             </Button>
                         ) : (
                             <Button
@@ -196,10 +196,9 @@ export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCard
                                     e.stopPropagation();
                                     handleJoinGroup();
                                 }}
-                                variant="outline"
-                                className={`w-full ${buttonStyles.outline} group`}
+                                className="w-full bg-gradient-to-r from-accent-purple to-accent-purple/80 hover:from-accent-purple/90 hover:to-accent-purple/70 text-white transition-all duration-300 shadow-lg hover:shadow-xl border-0 group py-3 text-base"
                             >
-                                <UserPlus className="mr-2 h-4 w-4" />
+                                <UserPlus className="mr-2 h-5 w-5" />
                                 Join Group
                             </Button>
                         )}

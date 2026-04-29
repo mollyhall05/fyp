@@ -6,21 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-    Users,
-    MapPin,
-    Link2,
-    ChevronLeft,
-    Calendar,
-    Clock,
-    Video,
-    UserPlus,
-    CheckCircle2,
-    ExternalLink,
-    Copy,
-    Smartphone
-} from "lucide-react";
+import { Users, MapPin, Link2, ChevronLeft, Calendar, Clock, Video, UserPlus, CheckCircle2, ExternalLink, Copy, Smartphone } from "lucide-react";
 
 interface Session {
     id: string;
@@ -210,7 +196,7 @@ const Session = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/5 flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-background via-primary/30 to-secondary/30 flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
                     <p className="text-muted-foreground">Loading session...</p>
@@ -221,7 +207,7 @@ const Session = () => {
 
     if (!session) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/5 flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-background via-primary/30 to-secondary/30 flex items-center justify-center">
                 <Card className="max-w-md w-full">
                     <CardContent className="p-8 text-center">
                         <h2 className="text-2xl font-bold mb-4">Session not found</h2>
@@ -238,7 +224,7 @@ const Session = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/5">
+        <div className="min-h-screen bg-gradient-to-br from-background via-primary/60 to-secondary/60">
             <div className="container mx-auto px-4 py-8 max-w-4xl">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -255,49 +241,23 @@ const Session = () => {
                         Back to {session.group_name}
                     </Button>
 
-                    {/* Debug Info - Remove in production */}
-                    {process.env.NODE_ENV === 'development' && (
-                        <Card className="mb-6 border-yellow-200 bg-yellow-50">
-                            <CardContent className="p-4">
-                                <h4 className="font-semibold text-yellow-800 mb-2">Debug Info</h4>
-                                <div className="text-xs text-yellow-700 space-y-1">
-                                    <p>Is Online: {session?.is_online ? 'Yes' : 'No'}</p>
-                                    <p>Meeting Link: {session?.meeting_link || 'None'}</p>
-                                    <p>Zoom Meeting ID: {session?.zoom_meeting_id || 'None'}</p>
-                                    <p>Zoom Join URL: {session?.zoom_join_url || 'None'}</p>
-                                    <p>Zoom Password: {session?.zoom_password || 'None'}</p>
-                                </div>
-                                <div className="mt-3 pt-3 border-t border-yellow-300">
-                                    <Button 
-                                        size="sm" 
-                                        variant="outline"
-                                        onClick={() => window.open('https://zoom.us/test', '_blank')}
-                                        className="text-xs"
-                                    >
-                                        Test Join (Zoom Test Link)
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-
                     {/* Main Session Card */}
                     <Card className="mb-8 overflow-hidden">
-                        <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                        <CardHeader className="bg-gradient-to-r from-primary to-secondary text-primary-foreground">
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                                 <div>
                                     <CardTitle className="text-2xl sm:text-3xl mb-2">{session.title}</CardTitle>
                                     {session.group_name && (
                                         <Link 
                                             to={`/group/${session.group_id}`}
-                                            className="inline-flex items-center text-blue-100 hover:text-white transition-colors"
+                                            className="inline-flex items-center text-primary-foreground/80 hover:text-primary-foreground transition-colors"
                                         >
                                             <Users className="h-4 w-4 mr-2" />
                                             {session.group_name}
                                         </Link>
                                     )}
                                 </div>
-                                <Badge className="bg-white/20 text-white border-white/30">
+                                <Badge className="bg-card/20 text-primary-foreground border-card/30">
                                     {session.is_online ? 'Online' : 'In-Person'}
                                 </Badge>
                             </div>
@@ -306,8 +266,8 @@ const Session = () => {
                             {/* Date and Time */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                 <div className="flex items-start space-x-3">
-                                    <div className="p-2 bg-blue-100 rounded-lg">
-                                        <Calendar className="h-5 w-5 text-blue-600" />
+                                    <div className="p-2 bg-primary/20 rounded-lg">
+                                        <Calendar className="h-5 w-5 text-primary" />
                                     </div>
                                     <div>
                                         <p className="font-medium">Date</p>
@@ -315,8 +275,8 @@ const Session = () => {
                                     </div>
                                 </div>
                                 <div className="flex items-start space-x-3">
-                                    <div className="p-2 bg-purple-100 rounded-lg">
-                                        <Clock className="h-5 w-5 text-purple-600" />
+                                    <div className="p-2 bg-secondary/20 rounded-lg">
+                                        <Clock className="h-5 w-5 text-secondary" />
                                     </div>
                                     <div>
                                         <p className="font-medium">Time</p>
@@ -329,11 +289,11 @@ const Session = () => {
 
                             {/* Location / Meeting Info */}
                             <div className="flex items-start space-x-3 mb-6">
-                                <div className="p-2 bg-green-100 rounded-lg">
+                                <div className="p-2 bg-accent/20 rounded-lg">
                                     {session.is_online ? (
-                                        <Video className="h-5 w-5 text-green-600" />
+                                        <Video className="h-5 w-5 text-accent" />
                                     ) : (
-                                        <MapPin className="h-5 w-5 text-green-600" />
+                                        <MapPin className="h-5 w-5 text-accent" />
                                     )}
                                 </div>
                                 <div className="flex-1">
@@ -343,15 +303,15 @@ const Session = () => {
                                     {session.is_online ? (
                                         <div className="space-y-4">
                                             {session.zoom_join_url ? (
-                                                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
+                                                <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 rounded-xl p-4">
                                                     <div className="flex items-center justify-between mb-4">
                                                         <div className="flex items-center space-x-2">
-                                                            <div className="p-2 bg-blue-600 rounded-lg">
+                                                            <div className="p-2 bg-primary rounded-lg">
                                                                 <Video className="h-4 w-4 text-white" />
                                                             </div>
                                                             <div>
-                                                                <h4 className="font-semibold text-blue-900">Zoom Meeting</h4>
-                                                                <p className="text-sm text-blue-700">Click below to join the session</p>
+                                                                <h4 className="font-semibold text-foreground">Zoom Meeting</h4>
+                                                                <p className="text-sm text-muted-foreground">Click below to join the session</p>
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center space-x-1">
@@ -367,13 +327,13 @@ const Session = () => {
                                                     </div>
                                                     
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                                                        <div className="bg-white rounded-lg p-3 border border-blue-100">
-                                                            <p className="text-xs text-blue-600 font-medium mb-1">Meeting ID</p>
+                                                        <div className="bg-card rounded-lg p-3 border border-primary/10">
+                                                            <p className="text-xs text-primary font-medium mb-1">Meeting ID</p>
                                                             <p className="font-mono text-sm font-semibold">{session.zoom_meeting_id}</p>
                                                         </div>
                                                         {session.zoom_password && (
-                                                            <div className="bg-white rounded-lg p-3 border border-blue-100">
-                                                                <p className="text-xs text-blue-600 font-medium mb-1">Password</p>
+                                                            <div className="bg-card rounded-lg p-3 border border-primary/10">
+                                                                <p className="text-xs text-primary font-medium mb-1">Password</p>
                                                                 <p className="font-mono text-sm font-semibold">{session.zoom_password}</p>
                                                             </div>
                                                         )}
@@ -409,7 +369,7 @@ const Session = () => {
                                                     </div>
                                                     
                                                     <div className="mt-3 pt-3 border-t border-blue-200">
-                                                        <div className="flex items-center justify-between text-xs text-blue-600">
+                                                        <div className="flex items-center justify-between text-xs text-primary">
                                                             <div className="flex items-center space-x-1">
                                                                 <Smartphone className="h-3 w-3" />
                                                                 <span>Works on desktop and mobile</span>
@@ -426,15 +386,15 @@ const Session = () => {
                                                     </div>
                                                 </div>
                                             ) : session.meeting_link ? (
-                                                <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4">
+                                                <div className="bg-gradient-to-r from-accent/10 to-secondary/10 border border-accent/20 rounded-xl p-4">
                                                     <div className="flex items-center justify-between mb-3">
                                                         <div className="flex items-center space-x-2">
-                                                            <div className="p-2 bg-green-600 rounded-lg">
+                                                            <div className="p-2 bg-accent rounded-lg">
                                                                 <Link2 className="h-4 w-4 text-white" />
                                                             </div>
                                                             <div>
-                                                                <h4 className="font-semibold text-green-900">Online Meeting</h4>
-                                                                <p className="text-sm text-green-700">External meeting platform</p>
+                                                                <h4 className="font-semibold text-foreground">Online Meeting</h4>
+                                                                <p className="text-sm text-muted-foreground">External meeting platform</p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -442,7 +402,7 @@ const Session = () => {
                                                     <Button 
                                                         asChild
                                                         size="lg" 
-                                                        className="w-full bg-green-600 hover:bg-green-700 text-white"
+                                                        className="w-full bg-gradient-to-r from-accent to-secondary hover:from-accent/90 hover:to-secondary/90 text-primary-foreground"
                                                     >
                                                         <a 
                                                             href={session.meeting_link}
@@ -457,8 +417,8 @@ const Session = () => {
                                                     </Button>
                                                 </div>
                                             ) : (
-                                                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                                                    <div className="flex items-center space-x-2 text-gray-600">
+                                                <div className="bg-card border border-border rounded-xl p-4">
+                                                    <div className="flex items-center space-x-2 text-muted-foreground">
                                                         <Video className="h-4 w-4" />
                                                         <span className="text-sm">Meeting link will be provided by the session host</span>
                                                     </div>
@@ -466,14 +426,14 @@ const Session = () => {
                                             )}
                                         </div>
                                     ) : (
-                                        <div className="bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl p-4">
+                                        <div className="bg-gradient-to-r from-accent/10 to-secondary/10 border border-accent/20 rounded-xl p-4">
                                             <div className="flex items-center space-x-2">
-                                                <div className="p-2 bg-orange-600 rounded-lg">
+                                                <div className="p-2 bg-accent rounded-lg">
                                                     <MapPin className="h-4 w-4 text-white" />
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-semibold text-orange-900">In-Person Location</h4>
-                                                    <p className="text-orange-700">
+                                                    <h4 className="font-semibold text-foreground">In-Person Location</h4>
+                                                    <p className="text-muted-foreground">
                                                         {session.location || 'Location to be determined'}
                                                     </p>
                                                 </div>
@@ -498,7 +458,7 @@ const Session = () => {
                                 <Button 
                                     onClick={handleJoinSession}
                                     disabled={isJoining}
-                                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3 text-lg"
+                                    className="bg-teal-700 hover:bg-teal-600 text-white px-8 py-3 text-lg"
                                 >
                                     {isJoining ? (
                                         <>

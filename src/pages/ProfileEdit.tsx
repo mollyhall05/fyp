@@ -9,13 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { 
-    User,
-    Mail,
-    ChevronLeft,
-    Save,
-    Loader2
-} from "lucide-react";
+import { User, Mail, ChevronLeft, Save, Loader2 } from "lucide-react";
 
 const ProfileEdit = () => {
     const navigate = useNavigate();
@@ -77,7 +71,7 @@ const ProfileEdit = () => {
                 description: "Your profile has been updated.",
             });
             
-            // Navigate back to dashboard after successful update
+            // Navigate back to the dashboard after successful update
             setTimeout(() => {
                 navigate('/dashboard');
             }, 1500);
@@ -101,7 +95,7 @@ const ProfileEdit = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/5 flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-background via-primary/30 to-secondary/30 flex items-center justify-center">
                 <div className="text-center">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
                     <p className="text-muted-foreground">Loading profile...</p>
@@ -111,7 +105,7 @@ const ProfileEdit = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/5">
+        <div className="min-h-screen bg-gradient-to-br from-background via-primary/60 to-secondary/60">
             <div className="container mx-auto px-4 py-8 max-w-2xl">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -130,7 +124,7 @@ const ProfileEdit = () => {
 
                     {/* Main Form Card */}
                     <Card className="overflow-hidden">
-                        <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                        <CardHeader className="bg-gradient-to-r from-primary to-secondary text-primary-foreground">
                             <CardTitle className="text-2xl flex items-center">
                                 <User className="h-6 w-6 mr-3" />
                                 Edit Profile
@@ -142,7 +136,7 @@ const ProfileEdit = () => {
                                 <div className="flex justify-center mb-6">
                                     <Avatar className="h-24 w-24">
                                         <AvatarImage src={user?.user_metadata?.avatar_url} />
-                                        <AvatarFallback className="text-2xl bg-gradient-to-br from-blue-500 to-purple-500 text-white">
+                                        <AvatarFallback className="text-2xl bg-gradient-to-br from-primary to-secondary text-primary-foreground">
                                             {formData.full_name ? formData.full_name.split(' ').map(n => n[0]).join('').toUpperCase() : 'U'}
                                         </AvatarFallback>
                                     </Avatar>
@@ -219,7 +213,7 @@ const ProfileEdit = () => {
                                     <Button
                                         type="submit"
                                         disabled={saving}
-                                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                                        className="flex-1 bg-teal-700 hover:bg-teal-600 text-white"
                                     >
                                         {saving ? (
                                             <>

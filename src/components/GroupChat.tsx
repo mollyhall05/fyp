@@ -294,7 +294,7 @@ const GroupChat = ({ groupId }: GroupChatProps) => {
     }, [messages]);
 
     return (
-        <Card className="shadow-soft h-[600px] flex flex-col">
+        <div className="flex flex-col h-full">
             <CardHeader className="border-b p-4">
                 <CardTitle className="text-lg">Group Chat</CardTitle>
             </CardHeader>
@@ -307,7 +307,7 @@ const GroupChat = ({ groupId }: GroupChatProps) => {
                     ) : (
                         messages.map((message) => (
                             <div key={message.id} className="flex gap-3">
-                                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0 shadow-sm">
+                                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
                                     {message.profiles?.username?.[0]?.toUpperCase() || "?"}
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -345,7 +345,7 @@ const GroupChat = ({ groupId }: GroupChatProps) => {
                     </Button>
                 </form>
             </CardContent>
-        </Card>
+        </div>
     );
 };
 
