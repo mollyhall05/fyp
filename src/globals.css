@@ -1,80 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Hide scrollbars globally */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: none;
+}
+
+/* For IE, Edge */
+* {
+  -ms-overflow-style: none;
+}
+
 @layer base {
   :root {
-    --background: 165 40% 85%;
-    --foreground: 165 55% 20%;
-    --card: 165 25% 95%;
-    --card-foreground: 165 55% 25%;
-    --popover: 165 25% 95%;
-    --popover-foreground: 165 55% 25%;
-    --primary: 165 90% 35%;
-    --primary-foreground: 165 40% 85%;
-    --primary-hover: 165 95% 30%;
-    --secondary: 200 90% 50%;
-    --secondary-foreground: 165 40% 85%;
-    --muted: 165 30% 75%;
-    --muted-foreground: 165 45% 30%;
-    --accent: 170 90% 40%;
-    --accent-foreground: 165 40% 85%;
-    --accent-purple: 250 75% 60%;
-    --accent-purple-foreground: 165 40% 85%;
-    --destructive: 0 80% 50%;
-    --destructive-foreground: 165 40% 85%;
-    --border: 165 25% 80%;
-    --input: 165 25% 80%;
-    --ring: 165 90% 35%;
-    --success: 145 80% 30%;
-    --success-foreground: 165 40% 85%;
-    --radius: 0.5rem;
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-display: 'Space Grotesk', system-ui, sans-serif;
+    
+    --background: 210 40% 96%;
+    --foreground: 210 30% 15%;
+    --card: 210 40% 98%;
+    --card-foreground: 210 30% 15%;
+    --popover: 210 40% 98%;
+    --popover-foreground: 210 30% 15%;
+    --primary: 195 85% 35%;
+    --primary-foreground: 210 40% 95%;
+    --primary-hover: 195 85% 40%;
+    --secondary: 160 75% 35%;
+    --secondary-foreground: 210 40% 95%;
+    --muted: 210 40% 92%;
+    --muted-foreground: 210 25% 35%;
+    --accent: 45 85% 55%;
+    --accent-foreground: 210 30% 15%;
+    --accent-purple: 285 75% 55%;
+    --accent-purple-foreground: 210 40% 95%;
+    --destructive: 0 75% 55%;
+    --destructive-foreground: 210 40% 95%;
+    --border: 210 40% 85%;
+    --input: 210 40% 85%;
+    --ring: 195 85% 35%;
+    --success: 160 70% 45%;
+    --success-foreground: 210 30% 15%;
+    --radius: 0.75rem;
 
-    --gradient-primary: linear-gradient(135deg, hsl(165 90% 35%) 0%, hsl(165 90% 45%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(200 90% 50%) 0%, hsl(200 90% 60%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(165 40% 85%) 0%, hsl(165 35% 80%) 50%, hsl(200 35% 75%) 100%);
-    --shadow-soft: 0 2px 15px -3px hsl(165 25% 70%);
-    --shadow-medium: 0 4px 25px -5px hsl(165 25% 60%);
-    --shadow-large: 0 10px 40px -10px hsl(165 25% 50%);
+    --gradient-primary: linear-gradient(135deg, #0F4C75 0%, #3DA5D9 50%, #2ECC71 100%);
+    --gradient-secondary: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+    --gradient-hero: linear-gradient(135deg, #0F4C75 0%, #3DA5D9 25%, #2ECC71 50%, #F39C12 75%, #0F4C75 100%);
+    --gradient-background: linear-gradient(135deg, #D8E4EC 0%, #C8DCE8 25%, #C4E8DC 50%, #E0E8DC 75%, #D8E4EC 100%);
+    --shadow-soft: 0 2px 15px -3px hsl(195 25% 70%);
+    --shadow-medium: 0 4px 25px -5px hsl(195 25% 60%);
+    --shadow-large: 0 10px 40px -10px hsl(195 25% 50%);
   }
 
   .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
+    --background: 210 25% 8%;
+    --foreground: 210 40% 95%;
 
-    --card: 222 47% 10%;
-    --card-foreground: 210 40% 98%;
+    --card: 210 25% 12%;
+    --card-foreground: 210 40% 95%;
 
-    --popover: 222 47% 10%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 210 25% 12%;
+    --popover-foreground: 210 40% 95%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 217 91% 65%;
+    --primary: 195 85% 40%;
+    --primary-foreground: 210 40% 95%;
+    --primary-hover: 195 85% 45%;
 
-    --secondary: 172 66% 55%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 160 75% 40%;
+    --secondary-foreground: 210 40% 95%;
 
-    --muted: 215 25% 27%;
-    --muted-foreground: 217.9 10.6% 64.9%;
+    --muted: 210 25% 18%;
+    --muted-foreground: 210 40% 75%;
 
-    --accent: 10 88% 75%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 45 85% 60%;
+    --accent-foreground: 210 30% 15%;
 
-    --success: 160 84% 50%;
-    --success-foreground: 0 0% 100%;
+    --success: 160 70% 50%;
+    --success-foreground: 210 30% 15%;
 
-    --destructive: 0 84% 65%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 210 40% 95%;
 
-    --border: 215 25% 27%;
-    --input: 215 25% 27%;
-    --ring: 217 91% 60%;
+    --border: 210 25% 18%;
+    --input: 210 25% 18%;
+    --ring: 195 85% 40%;
 
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(197 86% 54%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(172 66% 55%) 0%, hsl(155 74% 60%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(197 86% 54%) 100%);
-    --gradient-card: linear-gradient(135deg, hsl(222 47% 10%) 0%, hsl(222 47% 8%) 100%);
+    --gradient-primary: linear-gradient(135deg, #0F4C75 0%, #3DA5D9 50%, #2ECC71 100%);
+    --gradient-secondary: linear-gradient(135deg, #2ECC71 0%, #27AE60 100%);
+    --gradient-hero: linear-gradient(135deg, #0F4C75 0%, #3DA5D9 25%, #2ECC71 50%, #F39C12 75%, #0F4C75 100%);
+    --gradient-card: linear-gradient(135deg, hsl(210 25% 12%) 0%, hsl(210 25% 8%) 100%);
 
     --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.25);
     --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.25), 0 1px 2px -1px rgb(0 0 0 / 0.25);
@@ -85,6 +106,21 @@
 }
 
 @layer utilities {
+  /* Colorful gradient background */
+  .colorful-bg {
+    background: var(--gradient-background);
+    background-attachment: fixed;
+  }
+
+  /* Typography utilities */
+  .font-display {
+    font-family: var(--font-display);
+  }
+  
+  .font-body {
+    font-family: var(--font-sans);
+  }
+
   /* Professional animations */
   .animate-fade-in {
     animation: fadeIn var(--transition-base) ease-out;
@@ -160,6 +196,12 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    font-size: 15px; /* Increased from default 14px */
+    line-height: 1.6;
+  }
+
+  html {
+    font-size: 15px; /* Increased from default 14px */
   }
 
   /* Improve typography */

@@ -27,7 +27,7 @@ export const QuickActions = ({ onCreateGroup, onCreateSession }: QuickActionsPro
       title: "Create Group",
       description: "Start a new study group",
       icon: Plus,
-      color: "from-teal-600 to-teal-700",
+      color: "from-primary to-secondary",
       action: onCreateGroup || (() => {}),
       primary: true
     },
@@ -96,7 +96,7 @@ export const QuickActions = ({ onCreateGroup, onCreateSession }: QuickActionsPro
                 variant={action.primary ? "default" : "outline"}
                 className={`h-auto p-4 w-full justify-start text-left ${
                   action.primary 
-                    ? `bg-gradient-to-r ${action.color} hover:opacity-90 border-0 text-white shadow-lg hover:shadow-xl` 
+                    ? `bg-gradient-to-r ${action.color} hover:opacity-90 border-0 text-primary-foreground shadow-lg hover:shadow-xl` 
                     : 'hover:bg-muted/50 border-border/20'
                 }`}
                 onClick={action.action}
@@ -105,18 +105,18 @@ export const QuickActions = ({ onCreateGroup, onCreateSession }: QuickActionsPro
                   <div className={`p-2 rounded-lg ${
                     action.primary 
                       ? 'bg-white/20' 
-                      : `bg-gradient-to-br ${action.color} text-white`
+                      : `bg-gradient-to-br ${action.color} text-primary-foreground`
                   }`}>
                     <action.icon className="h-4 w-4" />
                   </div>
                   <div className="flex-1">
                     <p className={`font-medium ${
-                      action.primary ? 'text-white' : 'text-foreground'
+                      action.primary ? 'text-primary-foreground' : 'text-foreground'
                     }`}>
                       {action.title}
                     </p>
                     <p className={`text-xs ${
-                      action.primary ? 'text-white/80' : 'text-muted-foreground'
+                      action.primary ? 'text-primary-foreground/80' : 'text-muted-foreground'
                     }`}>
                       {action.description}
                     </p>

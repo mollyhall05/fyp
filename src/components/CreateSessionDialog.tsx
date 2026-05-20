@@ -127,6 +127,10 @@ export const CreateSessionDialog = ({
             if ((window as any).refreshDashboardSessionsCount) {
                 (window as any).refreshDashboardSessionsCount();
             }
+            // Refresh calendar sessions if available
+            if ((window as any).refreshCalendarSessions) {
+                (window as any).refreshCalendarSessions();
+            }
         } catch (error: any) {
             toast({
                 title: "Error",
@@ -210,7 +214,7 @@ export const CreateSessionDialog = ({
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-2">
-                                    <Video className="h-4 w-4 text-blue-600" />
+                                    <Video className="h-4 w-4 text-primary" />
                                     <Label htmlFor="zoom" className="text-sm font-medium">Auto-create Zoom Meeting</Label>
                                 </div>
                                 <Switch
@@ -234,8 +238,8 @@ export const CreateSessionDialog = ({
                             )}
                             
                             {useZoom && (
-                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                    <div className="flex items-center space-x-2 text-sm text-blue-700">
+                                <div className="bg-primary/10 border border-primary/30 rounded-lg p-3">
+                                    <div className="flex items-center space-x-2 text-sm text-primary">
                                         <Video className="h-4 w-4" />
                                         <span>A Zoom meeting will be automatically created when you save this session</span>
                                     </div>
@@ -256,17 +260,9 @@ export const CreateSessionDialog = ({
 
                     <div className="flex gap-3">
                         <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => onOpenChange(false)}
-                            className="flex-1"
-                        >
-                            Cancel
-                        </Button>
-                        <Button
                             type="submit"
                             disabled={loading || creatingZoomMeeting}
-                            className="flex-1 bg-gradient-primary"
+                            className="flex-1 bg-primary hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl border-0 text-primary-foreground px-6"
                         >
                             {loading || creatingZoomMeeting ? (
                                 <>
@@ -276,6 +272,14 @@ export const CreateSessionDialog = ({
                             ) : (
                                 "Create Session"
                             )}
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => onOpenChange(false)}
+                            className="flex-1"
+                        >
+                            Cancel
                         </Button>
                     </div>
                 </form>

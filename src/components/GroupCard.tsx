@@ -153,7 +153,7 @@ export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCard
             variants={cardVariants}
             className="h-full"
         >
-            <Card className="bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-border/20 hover:border-border/40 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col">
+            <Card className="bg-gradient-to-br from-card/95 to-card/85 backdrop-blur-sm border border-border/30 hover:border-blue-500/50 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 h-full flex flex-col">
                 <CardHeader className="pb-4">
                     <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -183,7 +183,7 @@ export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCard
                         {isMember ? (
                             <Button 
                                 onClick={handleViewGroup}
-                                className="w-full bg-teal-700 hover:bg-teal-600 text-white transition-all duration-300 shadow-lg hover:shadow-xl border-0 group py-3 text-base"
+                                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 shadow-lg hover:shadow-xl border-0 group py-3 text-base"
                             >
                                 View Group
                                 <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
@@ -196,7 +196,7 @@ export const GroupCard = ({ group: initialGroup, isMember, onUpdate }: GroupCard
                                     e.stopPropagation();
                                     handleJoinGroup();
                                 }}
-                                className="w-full bg-gradient-to-r from-accent-purple to-accent-purple/80 hover:from-accent-purple/90 hover:to-accent-purple/70 text-white transition-all duration-300 shadow-lg hover:shadow-xl border-0 group py-3 text-base"
+                                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 shadow-lg hover:shadow-xl border-0 group py-3 text-base"
                             >
                                 <UserPlus className="mr-2 h-5 w-5" />
                                 Join Group

@@ -103,6 +103,48 @@ export type Database = {
         }
         Relationships: []
       }
+      session_rsvps: {
+        Row: {
+          created_at: string
+          id: string
+          session_id: string
+          status: "attending" | "maybe" | "not_attending"
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          session_id: string
+          status: "attending" | "maybe" | "not_attending"
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          session_id?: string
+          status?: "attending" | "maybe" | "not_attending"
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_rsvps_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "study_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "session_rsvps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       study_sessions: {
         Row: {
           datetime: string

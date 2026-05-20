@@ -66,8 +66,8 @@ export const SearchBar = ({
     >
       <form onSubmit={handleSubmit} className="relative group">
         <div className="relative flex items-center">
-          <div className="absolute left-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-muted-foreground" />
+          <div className="absolute left-4 flex items-center pointer-events-none">
+            <Search className="h-6 w-6 text-muted500 dark:text-muted400" />
           </div>
           
           <Input
@@ -75,7 +75,7 @@ export const SearchBar = ({
             value={query}
             onChange={handleInputChange}
             placeholder={placeholder}
-            className="pl-10 pr-20 h-12 bg-card/50 backdrop-blur-sm border-border/20 focus:border-primary/50 transition-all duration-300 text-base"
+            className="pl-12 pr-20 h-14 bg-white/90 dark:bg-muted800/90 border-border/20 focus:border-primary/50 transition-all duration-300 text-lg"
           />
           
           <div className="absolute right-2 flex items-center gap-1">
@@ -134,7 +134,7 @@ export const SearchBar = ({
                     setQuery("");
                   }}
                 >
-                  <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center text-white font-semibold">
+                  <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center text-primary-foreground font-semibold">
                     {group.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -149,7 +149,7 @@ export const SearchBar = ({
                         {group.member_count || 0} members
                       </Badge>
                       {isUserMember(group.id) ? (
-                        <Badge variant="default" className="text-xs bg-teal-600 text-white">
+                        <Badge variant="default" className="text-xs bg-primary600 text-primary-foreground">
                           Member
                         </Badge>
                       ) : (

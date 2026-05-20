@@ -3,15 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar as CalendarIcon, Apple, CalendarPlus, ExternalLink, Clock, MapPin, Video, Loader2, Sparkles } from "lucide-react";
+import { Calendar as CalendarIcon, Apple, CalendarPlus, ExternalLink, Clock, MapPin, Video, Loader2, Sparkles, List, Grid, ChevronLeft, ChevronRight } from "lucide-react";
 import { addToCalendar, addToGoogleCalendar } from "@/lib/calendar";
 import { motion } from "framer-motion";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 interface CalendarEvent {
   id: string;
@@ -48,11 +44,89 @@ const CalendarView = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedSession, setSelectedSession] = useState<CalendarEvent | null>(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchSessions();
+    
+    // Make fetchSessions available globally for refresh
+    (window as any).refreshCalendarSessions = fetchSessions;
+    
+    return () => {
+      delete (window as any).refreshCalendarSessions;
+    };
   }, []);
+
+  // Calendar helper functions
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const generateCalendarDays = () => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const daysInMonth = getDaysInMonth(currentDate);
+    const firstDay = getFirstDayOfMonth(currentDate);
+    const days = [];
+
+    // Add empty cells for days before month starts
+    for (let i = 0; i < firstDay; i++) {
+      days.push(null);
+    }
+
+    // Add days of the month
+    for (let i = 1; i <= daysInMonth; i++) {
+      days.push(i);
+    }
+
+    return days;
+  };
+
+  const getEventsForDay = (day: number) => {
+    if (!day) return [];
+    
+    const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+    const dateStr = date.toDateString();
+    
+    return events.filter(event => {
+      const eventDate = new Date(event.start);
+      return eventDate.toDateString() === dateStr;
+    });
+  };
+
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    const newDate = new Date(currentDate);
+    if (direction === 'prev') {
+      newDate.setMonth(newDate.getMonth() - 1);
+    } else {
+      newDate.setMonth(newDate.getMonth() + 1);
+    }
+    setCurrentDate(newDate);
+  };
+
+  const handleSessionClick = (event: CalendarEvent) => {
+    setSelectedSession(event);
+    setIsPopupOpen(true);
+  };
+
+  const handleClosePopup = () => {
+    setIsPopupOpen(false);
+    setSelectedSession(null);
+  };
+
+  const handleGoToSession = () => {
+    if (selectedSession) {
+      window.location.href = `/session/${selectedSession.id}`;
+    }
+  };
 
   const fetchSessions = async () => {
     try {
@@ -94,6 +168,7 @@ const CalendarView = () => {
         start: session.datetime,
         end: new Date(new Date(session.datetime).getTime() + (session.duration_minutes * 60000)).toISOString(),
         extendedProps: {
+          meetingLink: session.is_online ? session.meeting_link : null,
           description: session.description,
           location: session.is_online ? session.meeting_link : session.location,
           isOnline: session.is_online,
@@ -101,7 +176,7 @@ const CalendarView = () => {
         }
       }));
 
-      // setEvents(calendarEvents);
+      setEvents(calendarEvents);
     } catch (error: any) {
       console.error('Error fetching sessions:', error);
       toast({
@@ -112,6 +187,107 @@ const CalendarView = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderCalendarGrid = () => {
+    const days = generateCalendarDays();
+    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-primary/20 rounded-xl shadow-lg p-6"
+      >
+        {/* Calendar Header */}
+        <div className="flex items-center justify-between mb-6">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigateMonth('prev')}
+            className="hover:bg-primary/10"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <h3 className="text-lg font-semibold text-foreground">
+            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+          </h3>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigateMonth('next')}
+            className="hover:bg-primary/10"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Week days header */}
+        <div className="grid grid-cols-7 gap-1 mb-2">
+          {weekDays.map(day => (
+            <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
+              {day}
+            </div>
+          ))}
+        </div>
+
+        {/* Calendar grid */}
+        <div className="grid grid-cols-7 gap-1">
+          {days.map((day, index) => {
+            const dayEvents = getEventsForDay(day);
+            const isToday = day === new Date().getDate() && 
+                           currentDate.getMonth() === new Date().getMonth() && 
+                           currentDate.getFullYear() === new Date().getFullYear();
+
+            return (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.02, duration: 0.3 }}
+                className={`
+                  relative aspect-square border rounded-lg p-1 transition-all duration-200
+                  ${day ? 'hover:bg-primary/5 cursor-pointer' : ''}
+                  ${isToday ? 'bg-primary/10 border-primary' : 'border-border'}
+                `}
+              >
+                {day && (
+                  <>
+                    <div className={`text-sm font-medium ${isToday ? 'text-primary' : 'text-foreground'}`}>
+                      {day}
+                    </div>
+                    {dayEvents.length > 0 && (
+                      <div className="mt-1 space-y-1">
+                        {dayEvents.slice(0, 2).map((event, eventIndex) => (
+                          <motion.div
+                            key={event.id}
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: (index * 0.02) + (eventIndex * 0.1), duration: 0.3 }}
+                            className="text-xs p-1 rounded bg-gradient-to-r from-primary to-secondary text-primary-foreground truncate cursor-pointer hover:scale-105 transition-transform"
+                            onClick={() => handleSessionClick(event)}
+                            title={event.title}
+                          >
+                            {event.title.length > 8 ? event.title.substring(0, 8) + '...' : event.title}
+                          </motion.div>
+                        ))}
+                        {dayEvents.length > 2 && (
+                          <div className="text-xs text-muted-foreground text-center">
+                            +{dayEvents.length - 2} more
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+      </motion.div>
+    );
   };
 
   const renderEventCard = (event: CalendarEvent) => {
@@ -156,10 +332,10 @@ const CalendarView = () => {
 
     return (
       <motion.div 
-        className="p-6 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-purple-600/20 hover:border-purple-600/40 transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 rounded-xl cursor-pointer"
+        className="p-6 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-primary/20 hover:border-primary/40 transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-1 rounded-xl cursor-pointer"
         whileHover={{ scale: 1.02, y: -2 }}
         transition={{ duration: 0.2 }}
-        onClick={() => window.location.href = `/session/${event.id}`}
+        onClick={() => handleSessionClick(event)}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
@@ -171,8 +347,8 @@ const CalendarView = () => {
                 variant={event.extendedProps.isOnline ? "outline" : "default"}
                 className={`text-xs font-medium ${
                   event.extendedProps.isOnline 
-                    ? "bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200" 
-                    : "bg-green-100 text-green-700 border-green-200 hover:bg-green-200"
+                    ? "bg-primary/10 text-primary border-primary/30 hover:bg-primary/20" 
+                    : "bg-secondary/10 text-secondary border-secondary/30 hover:bg-secondary/20"
                 } transition-colors`}
               >
                 {event.extendedProps.isOnline ? "Online" : "In-Person"}
@@ -275,7 +451,7 @@ const CalendarView = () => {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="p-4 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white mb-4">
+        <div className="p-4 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-primary-foreground mb-4">
           <CalendarIcon className="h-8 w-8" />
         </div>
         <h3 className="text-lg font-semibold text-foreground mb-2">Failed to load sessions</h3>
@@ -288,7 +464,7 @@ const CalendarView = () => {
             setError(null);
             fetchSessions();
           }}
-          className="bg-teal-700 hover:bg-teal-600 text-white"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           Try Again
         </Button>
@@ -331,6 +507,99 @@ const CalendarView = () => {
     );
   }
 
+  const SessionInfoPopup = () => {
+    if (!selectedSession) return null;
+
+    return (
+      <Dialog open={isPopupOpen} onOpenChange={setIsPopupOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5" />
+              {selectedSession.title}
+            </DialogTitle>
+            <DialogDescription>
+              Session details and information
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Badge 
+                variant={selectedSession.extendedProps.isOnline ? "outline" : "default"}
+                className={`text-xs font-medium ${
+                  selectedSession.extendedProps.isOnline 
+                    ? "bg-blue-100 text-blue-700 border-blue-200" 
+                    : "bg-green-100 text-green-700 border-green-200"
+                }`}
+              >
+                {selectedSession.extendedProps.isOnline ? "Online" : "In-Person"}
+              </Badge>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm">
+                <Sparkles className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">{selectedSession.extendedProps.groupName}</span>
+              </div>
+              
+              <div className="flex items-center gap-2 text-sm">
+                <Clock className="h-4 w-4 text-muted-foreground" />
+                <span>{new Date(selectedSession.start).toLocaleDateString('en-US', { 
+                  weekday: 'long',
+                  month: 'long', 
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  hour12: true 
+                })}</span>
+              </div>
+              
+              <div className="flex items-center gap-2 text-sm">
+                {selectedSession.extendedProps.isOnline ? (
+                  <>
+                    <Video className="h-4 w-4 text-muted-foreground" />
+                    <span>Online Session</span>
+                  </>
+                ) : (
+                  <>
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span>{selectedSession.extendedProps.location || 'In-Person'}</span>
+                  </>
+                )}
+              </div>
+            </div>
+            
+            {selectedSession.extendedProps.description && (
+              <div className="pt-2 border-t">
+                <p className="text-sm text-muted-foreground">
+                  {selectedSession.extendedProps.description}
+                </p>
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button 
+              onClick={handleGoToSession}
+              className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Go to Session Page
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleClosePopup}
+              className="w-full sm:w-auto"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   return (
     <motion.div 
       className="relative"
@@ -342,7 +611,7 @@ const CalendarView = () => {
       <div className="mb-6 p-6 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-purple-600/20 rounded-xl shadow-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-teal-700 text-white">
+            <div className="p-3 rounded-xl bg-primary text-primary-foreground">
               <CalendarIcon className="h-6 w-6" />
             </div>
             <div>
@@ -351,24 +620,31 @@ const CalendarView = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-200">
-              {events.length} Upcoming {events.length === 1 ? 'Session' : 'Sessions'}
-            </Badge>
-            {events.length > 0 && (
-              <Button 
-                variant="outline" 
+            <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => window.location.href = '/dashboard'}
-                className="text-xs"
+                onClick={() => setViewMode('list')}
+                className="h-7 px-2 text-xs"
               >
-                Create New Session
+                <List className="h-3 w-3 mr-1" />
+                List
               </Button>
-            )}
+              <Button
+                variant={viewMode === 'calendar' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('calendar')}
+                className="h-7 px-2 text-xs"
+              >
+                <Grid className="h-3 w-3 mr-1" />
+                Calendar
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Events List */}
+      {/* Events Display */}
       <motion.div 
         className="space-y-4"
         initial={{ opacity: 0, y: 20 }}
@@ -376,16 +652,22 @@ const CalendarView = () => {
         transition={{ delay: 0.3, duration: 0.5 }}
       >
         {events.length > 0 ? (
-          events.map((event, index) => (
-            <motion.div
-              key={event.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
-            >
-              {renderEventCard(event)}
-            </motion.div>
-          ))
+          <>
+            {viewMode === 'calendar' ? (
+              renderCalendarGrid()
+            ) : (
+              events.map((event, index) => (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + index * 0.1, duration: 0.5 }}
+                >
+                  {renderEventCard(event)}
+                </motion.div>
+              ))
+            )}
+          </>
         ) : (
           <motion.div 
             className="flex flex-col justify-center items-center py-16 bg-card border border-primary/20 rounded-2xl"
@@ -393,9 +675,9 @@ const CalendarView = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.5 }}
           >
-            <div className="p-4 rounded-xl bg-gradient-to-r from-blue-600 to-teal-500 text-white mb-4">
-              <CalendarIcon className="h-8 w-8" />
-            </div>
+              <div className="p-3 rounded-xl bg-primary text-primary-foreground">
+                  <CalendarIcon className="h-6 w-6" />
+              </div>
             <h3 className="text-lg font-semibold text-foreground mb-2">No upcoming sessions</h3>
             <p className="text-sm text-muted-foreground text-center max-w-md mb-6">
               You don't have any study sessions scheduled. Join a study group or create a new session to get started!
@@ -403,22 +685,17 @@ const CalendarView = () => {
             <div className="flex gap-3">
               <Button 
                 onClick={() => window.location.href = '/dashboard'}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 <CalendarPlus className="mr-2 h-4 w-4" />
                 Create Session
-              </Button>
-              <Button 
-                variant="outline"
-                onClick={() => window.location.href = '/dashboard#discover'}
-              >
-                <Sparkles className="mr-2 h-4 w-4" />
-                Discover Groups
               </Button>
             </div>
           </motion.div>
         )}
       </motion.div>
+      
+      <SessionInfoPopup />
     </motion.div>
   );
 };

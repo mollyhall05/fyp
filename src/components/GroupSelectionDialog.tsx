@@ -43,7 +43,7 @@ export const GroupSelectionDialog = ({
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-teal-600" />
+            <Calendar className="h-5 w-5 text-primary600" />
             Select Group for Session
           </DialogTitle>
         </DialogHeader>
@@ -74,8 +74,8 @@ export const GroupSelectionDialog = ({
                   <Card 
                     className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
                       selectedGroup?.id === group.id 
-                        ? 'ring-2 ring-teal-500 border-teal-500 bg-teal-50/50' 
-                        : 'hover:border-teal-300'
+                        ? 'ring-2 ring-teal-500 border-primary500 bg-primary50/50' 
+                        : 'hover:border-primary300'
                     }`}
                     onClick={() => setSelectedGroup(group)}
                   >
@@ -99,8 +99,8 @@ export const GroupSelectionDialog = ({
                         <div className="ml-4">
                           <div className={`w-4 h-4 rounded-full border-2 ${
                             selectedGroup?.id === group.id
-                              ? 'bg-teal-500 border-teal-500'
-                              : 'border-gray-300'
+                              ? 'bg-primary500 border-primary500'
+                              : 'border-border300'
                           }`}>
                             {selectedGroup?.id === group.id && (
                               <div className="w-full h-full flex items-center justify-center">
@@ -130,7 +130,7 @@ export const GroupSelectionDialog = ({
             <Button 
               onClick={handleSelectGroup}
               disabled={!selectedGroup}
-              className="bg-teal-600 hover:bg-teal-700 text-white"
+              className="bg-primary600 hover:bg-primary700 text-primary-foreground"
             >
               <Calendar className="h-4 w-4 mr-2" />
               Schedule Session

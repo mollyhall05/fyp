@@ -37,10 +37,6 @@ const Group = () => {
 
     // Load user data on component mount
     useEffect(() => {
-        // Set body background to match dashboard
-        document.body.style.backgroundColor = '#ccfbf1';
-        document.body.style.backgroundAttachment = 'fixed';
-        
         const getUser = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             setUser(user);
@@ -243,14 +239,17 @@ const Group = () => {
     };
 
     return (
-        <div className="min-h-screen" style={{ backgroundColor: '#ccfbf1' }}>
+        <div className="min-h-screen bg-gradient-to-b from-transparent via-primary/20 to-secondary/50 relative overflow-hidden">
+            <div className="absolute inset-0 -z-10">
+                <div className="absolute inset-0 bg-[radial-gradient(hsl(var(--primary))_1px,transparent_1px)] [background-size:20px_20px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 dark:opacity-[0.05]"></div>
+            </div>
             {/* Simple Header - Same as Dashboard */}
-            <div className="fixed top-6 left-0 right-0 z-50 flex justify-between items-start px-6">
+            <div className="flex justify-between items-start px-6 pt-6 pb-4">
                 {/* Home Button */}
                 <Button
                     variant="ghost"
                     onClick={() => navigate('/dashboard')}
-                    className="bg-transparent hover:bg-transparent text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition-all duration-300 px-6 py-3 text-lg font-medium no-focus-border"
+                    className="bg-transparent hover:bg-transparent text-foreground hover:text-primary transition-all duration-300 px-6 py-3 text-lg font-medium no-focus-border"
                 >
                     <LayoutDashboard className="h-6 w-6 mr-3" />
                     Home
@@ -261,9 +260,9 @@ const Group = () => {
                     <Button
                         variant="ghost"
                         onClick={() => setShowProfile(!showProfile)}
-                        className="bg-transparent hover:bg-transparent text-gray-700 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition-all duration-300 px-6 py-3 text-lg font-medium no-focus-border"
+                        className="bg-transparent hover:bg-transparent text-foreground hover:text-primary transition-all duration-300 px-6 py-3 text-lg font-medium no-focus-border"
                     >
-                        <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900/30 rounded-full flex items-center justify-center text-teal-600 dark:text-teal-400 font-semibold text-base mr-3">
+                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-primary-foreground font-semibold text-base mr-3 shadow-sm">
                             {user?.user_metadata?.full_name ? user.user_metadata.full_name.split(' ').map(n => n[0]).join('').toUpperCase() : user?.email?.[0]?.toUpperCase() || 'U'}
                         </div>
                         Profile
@@ -275,32 +274,21 @@ const Group = () => {
                         <motion.div
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+                            className="absolute right-0 mt-2 w-64 bg-popover rounded-xl shadow-lg border border-border overflow-hidden"
                         >
-                            <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                                <p className="font-medium text-gray-900 dark:text-white">
+                            <div className="p-4 border-b border-border">
+                                <p className="font-medium text-popover-foreground">
                                     {user?.user_metadata?.full_name || user?.email}
                                 </p>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
+                                <p className="text-sm text-muted-foreground">
                                     {user?.email}
                                 </p>
                             </div>
                             <div className="p-2">
-                                <Button
-                                    variant="ghost"
-                                    onClick={() => {
-                                        setShowProfile(false);
-                                        navigate('/profile/edit');
-                                    }}
-                                    className="w-full justify-start text-left hover:bg-gray-100 dark:hover:bg-gray-700"
-                                >
-                                    <Settings className="h-4 w-4 mr-2" />
-                                    Edit Profile Details
-                                </Button>
-                                <Button
+                               <Button
                                     variant="ghost"
                                     onClick={handleSignOut}
-                                    className="w-full justify-start text-left hover:bg-gray-100 dark:hover:bg-gray-700"
+                                    className="w-full justify-start text-left hover:bg-accent"
                                 >
                                     <LogOut className="h-4 w-4 mr-2" />
                                     Sign out
@@ -312,7 +300,7 @@ const Group = () => {
             </div>
 
             {/* Main Content */}
-            <main className="py-6">
+            <main className="py-24 relative z-10">
                 <div className="max-w-6xl mx-auto px-6">
                     {/* Group Header */}
                     <motion.div
@@ -320,18 +308,18 @@ const Group = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="mb-8"
                     >
-                        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-8">
+                        <div className="bg-card rounded-2xl shadow-xl border border-border p-8">
                             <div className="flex items-start justify-between mb-6">
                                 <div>
-                                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                                    <h1 className="text-3xl font-bold text-card-foreground mb-2">
                                         {group.name}
                                     </h1>
-                                    <p className="text-gray-600 dark:text-gray-300 text-lg">
-                                        {group.subject || 'Study group'}
+                                    <p className="text-muted-foreground text-lg">
+                                        {group.description || 'Study group'}
                                     </p>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                    <Badge variant="secondary" className="text-lg px-3 py-1">
+                                    <Badge variant="outline" className="text-lg px-3 py-1">
                                         {group.member_count || members.length} members
                                     </Badge>
                                     {group.is_public && (
@@ -340,18 +328,6 @@ const Group = () => {
                                         </Badge>
                                     )}
                                 </div>
-                            </div>
-                            
-                            {/* Group Actions */}
-                            <div className="flex gap-3">
-                                <Button className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 transition-all duration-300 shadow-lg hover:shadow-xl border-0 text-white px-6">
-                                    <UserPlus className="h-4 w-4 mr-2" />
-                                    Invite Members
-                                </Button>
-                                <Button variant="outline" className="border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    <Settings className="h-4 w-4 mr-2" />
-                                    Settings
-                                </Button>
                             </div>
                         </div>
                     </motion.div>
@@ -363,8 +339,8 @@ const Group = () => {
                         transition={{ delay: 0.2 }}
                     >
                         <Tabs defaultValue="sessions" className="space-y-6">
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6">
-                                <TabsList className="grid w-full grid-cols-3 bg-transparent border-b border-gray-200 dark:border-gray-700 rounded-none h-auto p-0">
+                            <div className="bg-card rounded-2xl shadow-xl border border-border p-6">
+                                <TabsList className="grid w-full grid-cols-3 bg-transparent border-b border-border rounded-none h-auto p-0">
                                     <TabsTrigger 
                                         value="sessions" 
                                         className="data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent px-1 py-3 rounded-none text-muted-foreground data-[state=active]:text-foreground"
@@ -398,26 +374,26 @@ const Group = () => {
                                             </div>
                                             <Button
                                                 onClick={() => setShowCreateSession(true)}
-                                                className="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 transition-all duration-300 shadow-lg hover:shadow-xl border-0 text-white px-6"
+                                                className="bg-primary hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl border-0 text-primary-foreground px-6"
                                             >
                                                 <Plus className="mr-2 h-5 w-5" />
                                                 Schedule Session
                                             </Button>
                                         </div>
-                                        <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                                        <div className="bg-muted/50 rounded-xl border border-border">
                                             <SessionList groupId={id!} />
                                         </div>
                                     </TabsContent>
 
                         <TabsContent value="chat" className="mt-0">
-                            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
+                            <div className="bg-muted/50 rounded-xl border border-border">
                                 <GroupChat groupId={id!} />
                             </div>
                         </TabsContent>
 
                         <TabsContent value="members" className="mt-0">
-                            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-700">
-                                <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                            <div className="bg-muted/50 rounded-xl border border-border">
+                                <div className="p-6 border-b border-border">
                                     <div className="flex justify-between items-center">
                                         <div>
                                             <h3 className="text-xl font-medium text-foreground">Group Members</h3>
@@ -425,29 +401,25 @@ const Group = () => {
                                                 {members.length} {members.length === 1 ? 'member' : 'members'} in this group
                                             </p>
                                         </div>
-                                        <Button variant="outline" size="default" className="border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 py-2 px-4">
-                                            <UserPlus className="mr-2 h-5 w-5" />
-                                            Invite
-                                        </Button>
                                     </div>
                                 </div>
-                                <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                                <div className="divide-y divide-border">
                                     {members.map((member) => (
                                         <div
                                             key={member.id}
-                                            className="p-4 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150"
+                                            className="p-4 hover:bg-accent/50 transition-colors duration-150"
                                         >
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center space-x-4">
                                                     <div className="relative">
                                                         <Avatar className="h-10 w-10">
-                                                            <AvatarFallback className="bg-gradient-to-br from-teal-500 to-teal-600 text-white font-semibold">
+                                                            <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground font-semibold">
                                                                 {member.profiles?.username?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || 
                                                                  member.profiles?.email?.[0]?.toUpperCase() || '?'}
                                                             </AvatarFallback>
                                                         </Avatar>
                                                         {member.is_creator && (
-                                                            <div className="absolute -bottom-1 -right-1 bg-teal-600 text-white p-0.5 rounded-full">
+                                                            <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground p-0.5 rounded-full">
                                                                 <UserCheck className="h-3 w-3" />
                                                             </div>
                                                         )}
@@ -466,7 +438,7 @@ const Group = () => {
                                                 {(member.role === 'admin' || member.is_creator) && (
                                                     <Badge 
                                                         variant={member.is_creator ? 'default' : 'outline'}
-                                                        className={`${member.is_creator ? 'bg-teal-600 text-white border-teal-600' : 'border-gray-300 text-foreground'}`}
+                                                        className={`${member.is_creator ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-foreground'}`}
                                                     >
                                                         {member.is_creator ? 'Creator' : 'Admin'}
                                                     </Badge>

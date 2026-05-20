@@ -1,4 +1,3 @@
-import MemberList from "@/components/MemberList";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -307,11 +306,6 @@ const Session = () => {
         });
     };
 
-    // Calculate confirmed attendees count
-    const getConfirmedAttendeesCount = () => {
-        return groupMembers.filter(member => member.rsvp_status === 'attending').length;
-    };
-
     // Format date and time
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -405,9 +399,7 @@ const Session = () => {
                                     <div className="p-2 bg-secondary/10 rounded-lg w-fit mx-auto mb-2">
                                         <Users className="h-5 w-5 text-secondary"/>
                                     </div>
-                                    <p className="text-2xl font-bold text-foreground">
-                                        {groupMembers.length > 0 ? `${getConfirmedAttendeesCount()}/${groupMembers.length}` : "--"}
-                                    </p>
+                                    <p className="text-2xl font-bold text-foreground">--</p>
                                     <p className="text-sm text-muted-foreground">Participants</p>
                                 </CardContent>
                             </Card>
@@ -513,31 +505,6 @@ const Session = () => {
                                             )}
                                             No, I can't make it
                                         </Button>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-
-                        {/* Group Members & RSVP Status */}
-                        <Card className="mb-8 overflow-hidden bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-xl">
-                            <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10 p-6">
-                                <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-primary/20 rounded-lg">
-                                        <Users className="h-5 w-5 text-primary"/>
-                                    </div>
-                                    <div>
-                                        <CardTitle className="text-lg">Group Members</CardTitle>
-                                        <p className="text-sm text-muted-foreground">RSVP status for all group members</p>
-                                    </div>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-6">
-                                {groupMembers.length > 0 ? (
-                                    <MemberList members={groupMembers} />
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4"/>
-                                        <p className="text-muted-foreground">No group members found</p>
                                     </div>
                                 )}
                             </CardContent>
@@ -853,6 +820,21 @@ const Session = () => {
                             </CardContent>
                         </Card>
 
+                        {/* Additional Info Card */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Session Information</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="flex items-center space-x-2">
+                                        <Users className="h-4 w-4 text-muted-foreground"/>
+                                        <span className="text-sm text-muted-foreground">Open to all group members</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                        <CheckCircle2 className="h-4 w-4 text-muted-foreground"/>
+                                        <span className="text-sm text-muted-foreground">Free to attend</span>
+
                         {/* Group Members & RSVP Status */}
                         <Card className="mb-8 overflow-hidden bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-xl">
                             <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10 p-6">
@@ -875,6 +857,10 @@ const Session = () => {
                                         <p className="text-muted-foreground">No group members found</p>
                                     </div>
                                 )}
+                            </CardContent>
+                        </Card>
+                                    </div>
+                                </div>
                             </CardContent>
                         </Card>
                     </motion.div>
@@ -925,9 +911,7 @@ const Session = () => {
                                     <div className="p-2 bg-secondary/10 rounded-lg w-fit mx-auto mb-2">
                                         <Users className="h-5 w-5 text-secondary"/>
                                     </div>
-                                    <p className="text-2xl font-bold text-foreground">
-                                        {groupMembers.length > 0 ? `${getConfirmedAttendeesCount()}/${groupMembers.length}` : "--"}
-                                    </p>
+                                    <p className="text-2xl font-bold text-foreground">--</p>
                                     <p className="text-sm text-muted-foreground">Participants</p>
                                 </CardContent>
                             </Card>
@@ -954,6 +938,89 @@ const Session = () => {
                                 </CardContent>
                             </Card>
                         </div>
+
+                        {/* RSVP Section */}
+                        <Card
+                            className="mb-8 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-primary/20 hover:border-primary/40 transition-all duration-300">
+                            <CardHeader className="pb-4">
+                                <div className="flex items-center space-x-3">
+                                    <div className="p-2 bg-primary/10 rounded-lg">
+                                        <CheckCircle2 className="h-5 w-5 text-primary"/>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-foreground">RSVP</h3>
+                                        <p className="text-sm text-muted-foreground">Will you be attending this
+                                            session?</p>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-6">
+                                {rsvpStatus ? (
+                                    <div
+                                        className="flex items-center justify-between p-4 bg-muted/20 rounded-lg border border-muted/30">
+                                        <div className="flex items-center space-x-3">
+                                            <div
+                                                className={`p-2 rounded-lg ${rsvpStatus === 'attending' ? 'bg-green-100' : 'bg-red-100'}`}>
+                                                <CheckCircle2
+                                                    className={`h-5 w-5 ${rsvpStatus === 'attending' ? 'text-green-600' : 'text-red-600'}`}/>
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-foreground">
+                                                    You
+                                                    have {rsvpStatus === 'attending' ? 'confirmed' : 'declined'} attendance
+                                                </p>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {rsvpStatus === 'attending' ? 'See you at the session!' : 'We hope to see you at the next one.'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleRsvp(rsvpStatus === 'attending' ? 'not_attending' : 'attending')}
+                                            disabled={isUpdatingRsvp}
+                                            className="border-primary hover:bg-primary/10 transition-all duration-300"
+                                        >
+                                            {isUpdatingRsvp ? (
+                                                <div
+                                                    className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                                            ) : null}
+                                            Change RSVP
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col sm:flex-row gap-4">
+                                        <Button
+                                            onClick={() => handleRsvp('attending')}
+                                            disabled={isUpdatingRsvp}
+                                            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 shadow-lg hover:shadow-xl border-0"
+                                        >
+                                            {isUpdatingRsvp ? (
+                                                <div
+                                                    className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                            ) : (
+                                                <CheckCircle2 className="h-5 w-5 mr-2"/>
+                                            )}
+                                            Yes, I'll attend
+                                        </Button>
+                                        <Button
+                                            onClick={() => handleRsvp('not_attending')}
+                                            disabled={isUpdatingRsvp}
+                                            variant="outline"
+                                            className="flex-1 border-primary hover:bg-primary/10 transition-all duration-300"
+                                        >
+                                            {isUpdatingRsvp ? (
+                                                <div
+                                                    className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                                            ) : (
+                                                <X className="h-5 w-5 mr-2"/>
+                                            )}
+                                            No, I can't make it
+                                        </Button>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
 
                         <Card
                             className="mb-8 overflow-hidden bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-xl">
@@ -1265,112 +1332,22 @@ const Session = () => {
                             </CardContent>
                         </Card>
 
-                        {/* RSVP Section */}
-                        <Card
-                            className="mb-8 bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-primary/20 hover:border-primary/40 transition-all duration-300">
-                            <CardHeader className="pb-4">
-                                <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-primary/10 rounded-lg">
-                                        <CheckCircle2 className="h-5 w-5 text-primary"/>
+                        {/* Additional Info Card */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">Session Information</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="flex items-center space-x-2">
+                                        <Users className="h-4 w-4 text-muted-foreground"/>
+                                        <span className="text-sm text-muted-foreground">Open to all group members</span>
                                     </div>
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-foreground">RSVP</h3>
-                                        <p className="text-sm text-muted-foreground">Will you be attending this
-                                            session?</p>
+                                    <div className="flex items-center space-x-2">
+                                        <CheckCircle2 className="h-4 w-4 text-muted-foreground"/>
+                                        <span className="text-sm text-muted-foreground">Free to attend</span>
                                     </div>
                                 </div>
-                            </CardHeader>
-                            <CardContent className="p-6">
-                                {rsvpStatus ? (
-                                    <div
-                                        className="flex items-center justify-between p-4 bg-muted/20 rounded-lg border border-muted/30">
-                                        <div className="flex items-center space-x-3">
-                                            <div
-                                                className={`p-2 rounded-lg ${rsvpStatus === 'attending' ? 'bg-green-100' : 'bg-red-100'}`}>
-                                                <CheckCircle2
-                                                    className={`h-5 w-5 ${rsvpStatus === 'attending' ? 'text-green-600' : 'text-red-600'}`}/>
-                                            </div>
-                                            <div>
-                                                <p className="font-semibold text-foreground">
-                                                    You
-                                                    have {rsvpStatus === 'attending' ? 'confirmed' : 'declined'} attendance
-                                                </p>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {rsvpStatus === 'attending' ? 'See you at the session!' : 'We hope to see you at the next one.'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-
-                                            onClick={() => handleRsvp(rsvpStatus === 'attending' ? 'not_attending' : 'attending')}
-                                            disabled={isUpdatingRsvp}
-                                            className="border-primary hover:bg-primary/10 transition-all duration-300"
-                                        >
-                                            {isUpdatingRsvp ? (
-                                                <div
-                                                    className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
-                                            ) : null}
-                                            Change RSVP
-                                        </Button>
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-col sm:flex-row gap-4">
-                                        <Button
-                                            onClick={() => handleRsvp('attending')}
-                                            disabled={isUpdatingRsvp}
-                                            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 shadow-lg hover:shadow-xl border-0"
-                                        >
-                                            {isUpdatingRsvp ? (
-                                                <div
-                                                    className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                            ) : (
-                                                <CheckCircle2 className="h-5 w-5 mr-2"/>
-                                            )}
-                                            Yes, I'll attend
-                                        </Button>
-                                        <Button
-                                            onClick={() => handleRsvp('not_attending')}
-                                            disabled={isUpdatingRsvp}
-                                            variant="outline"
-                                            className="flex-1 border-primary hover:bg-primary/10 transition-all duration-300"
-                                        >
-                                            {isUpdatingRsvp ? (
-                                                <div
-                                                    className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
-                                            ) : (
-                                                <X className="h-5 w-5 mr-2"/>
-                                            )}
-                                            No, I can't make it
-                                        </Button>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
-                        
-                        {/* Group Members & RSVP Status */}
-                        <Card className="mb-8 overflow-hidden bg-gradient-to-br from-card/90 to-card/70 backdrop-blur-md border border-primary/20 hover:border-primary/40 transition-all duration-300 hover:shadow-xl">
-                            <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10 p-6">
-                                <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-primary/20 rounded-lg">
-                                        <Users className="h-5 w-5 text-primary"/>
-                                    </div>
-                                    <div>
-                                        <CardTitle className="text-lg">Group Members</CardTitle>
-                                        <p className="text-sm text-muted-foreground">RSVP status for all group members</p>
-                                    </div>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-6">
-                                {groupMembers.length > 0 ? (
-                                    <MemberList members={groupMembers} />
-                                ) : (
-                                    <div className="text-center py-8">
-                                        <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4"/>
-                                        <p className="text-muted-foreground">No group members found</p>
-                                    </div>
-                                )}
                             </CardContent>
                         </Card>
                     </motion.div>

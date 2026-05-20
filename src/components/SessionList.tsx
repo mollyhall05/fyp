@@ -109,14 +109,6 @@ export const SessionList = ({ groupId }: SessionListProps) => {
                         <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
                         <h3 className="text-lg font-medium text-foreground">No sessions yet</h3>
                         <p className="text-muted-foreground mb-6">Be the first to schedule a study session!</p>
-                        <Button 
-                            onClick={() => setShowCreateDialog(true)}
-                            variant="outline"
-                            className={buttonStyles.outline}
-                        >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Create Session
-                        </Button>
                     </motion.div>
                 ) : (
                     <motion.div 

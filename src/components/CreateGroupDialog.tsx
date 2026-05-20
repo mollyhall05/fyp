@@ -95,45 +95,43 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[500px] bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800 backdrop-blur-xl border border-teal-500/30 shadow-2xl shadow-teal-500/15">
+            <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle className="text-white text-xl">Create Study Group</DialogTitle>
-                    <DialogDescription className="text-gray-300">
+                    <DialogTitle>Create Study Group</DialogTitle>
+                    <DialogDescription>
                         Create a new study group and invite others to join
                     </DialogDescription>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="name" className="text-gray-200 font-medium">Group Name</Label>
+                        <Label htmlFor="name">Group Name</Label>
                         <Input
                             id="name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="e.g., Advanced Calculus Study Group"
                             required
-                            className="bg-slate-700/50 border-teal-500/30 text-white placeholder-white/70 focus:border-teal-400 focus:ring-teal-400/20"
                         />
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="description" className="text-gray-200 font-medium">Description</Label>
+                        <Label htmlFor="description">Description</Label>
                         <Textarea
                             id="description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Describe what this group is about..."
                             rows={3}
-                            className="bg-slate-700/50 border-teal-500/30 text-white placeholder-white/70 focus:border-teal-400 focus:ring-teal-400/20"
                         />
                     </div>
 
-                    <div className="flex items-center justify-between p-4 border rounded-lg bg-slate-700/30 border-teal-500/30">
+                    <div className="flex items-center justify-between">
                         <div className="space-y-0.5">
-                            <Label htmlFor="privacy-toggle" className="text-base text-gray-200 font-medium">
+                            <Label htmlFor="privacy-toggle" className="text-base font-medium">
                                 {isPublic ? 'Public Group' : 'Private Group'}
                             </Label>
-                            <p className="text-sm text-gray-400">
+                            <p className="text-sm text-muted-foreground">
                                 {isPublic 
                                     ? 'Anyone can find and join this group' 
                                     : 'Only people with an invite link can join'}
@@ -143,25 +141,24 @@ export const CreateGroupDialog = ({ open, onOpenChange, onSuccess }: CreateGroup
                             id="privacy-toggle"
                             checked={isPublic}
                             onCheckedChange={setIsPublic}
-                            className="data-[state=checked]:bg-teal-600"
                         />
                     </div>
 
-                    <div className="flex gap-3 mt-4">
+                    <div className="flex gap-3">
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            className="flex-1 bg-primary hover:bg-primary/90 transition-all duration-300 shadow-lg hover:shadow-xl border-0 text-primary-foreground px-6"
+                        >
+                            {loading ? "Creating..." : "Create Group"}
+                        </Button>
                         <Button
                             type="button"
                             variant="outline"
                             onClick={() => onOpenChange(false)}
-                            className="flex-1 bg-slate-600/50 border-teal-500/30 text-white hover:bg-slate-600/70"
+                            className="flex-1"
                         >
                             Cancel
-                        </Button>
-                        <Button
-                            type="submit"
-                            disabled={loading}
-                            className="flex-1 bg-gradient-to-r from-teal-600 to-indigo-600 hover:from-teal-700 hover:to-indigo-700 text-white shadow-lg shadow-teal-500/20"
-                        >
-                            {loading ? "Creating..." : "Create Group"}
                         </Button>
                     </div>
                 </form>

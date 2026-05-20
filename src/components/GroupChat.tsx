@@ -295,10 +295,10 @@ const GroupChat = ({ groupId }: GroupChatProps) => {
 
     return (
         <div className="flex flex-col h-full">
-            <CardHeader className="border-b p-4">
+            <CardHeader className="border-b p-4 bg-white/30 backdrop-blur-sm">
                 <CardTitle className="text-lg">Group Chat</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+            <CardContent className="flex-1 flex flex-col p-0 overflow-hidden bg-white/30 backdrop-blur-sm">
                 <div className="flex-1 overflow-y-auto p-4 space-y-4 messages-container">
                     {messages.length === 0 ? (
                         <div className="h-full flex items-center justify-center text-muted-foreground">
@@ -307,7 +307,7 @@ const GroupChat = ({ groupId }: GroupChatProps) => {
                     ) : (
                         messages.map((message) => (
                             <div key={message.id} className="flex gap-3">
-                                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold">
+                                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-primary-foreground text-sm font-bold">
                                     {message.profiles?.username?.[0]?.toUpperCase() || "?"}
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -319,7 +319,7 @@ const GroupChat = ({ groupId }: GroupChatProps) => {
                                             {formatMessageTime(message.created_at)}
                                         </span>
                                     </div>
-                                    <p className="text-sm bg-muted rounded-lg p-3 break-words">
+                                    <p className="text-sm bg-white/90 rounded-lg p-3 break-words border border-border/20">
                                         {message.content}
                                     </p>
                                 </div>
@@ -329,7 +329,7 @@ const GroupChat = ({ groupId }: GroupChatProps) => {
                     <div ref={messagesEndRef} />
                 </div>
 
-                <form onSubmit={handleSendMessage} className="flex gap-2">
+                <form onSubmit={handleSendMessage} className="flex gap-2 p-4 bg-white/30 backdrop-blur-sm border-t border-border/20 rounded-b-xl">
                     <Input
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
