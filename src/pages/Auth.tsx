@@ -148,8 +148,6 @@ const Auth = () => {
         if (error) {
             showErrorToast("Error signing in", error.message);
         } else {
-            // This will be handled by the auth state listener in useEffect
-            // which will automatically redirect to /dashboard on successful auth
             showSuccessToast("Welcome back!", "You are now logged in.");
         }
         
